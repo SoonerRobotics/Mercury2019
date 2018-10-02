@@ -1,0 +1,11 @@
+#ignore directories starting with .
+.*
+
+#ignore Python cache files
+*.pyc
+
+#ignore config piles
+*.ini
+
+#ignore VS Code workspace files
+*.code-workspace
