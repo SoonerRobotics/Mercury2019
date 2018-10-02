@@ -3,6 +3,8 @@ import socket
 from shared.ControllerState import ControllerState
 from shared.MercuryConfig import MercuryConfig
 
+print(pygame)
+
 MercuryConfig.read()
 
 pygame.init()
@@ -20,6 +22,8 @@ joystick.init()
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.connect(("104.154.244.147", 8080))
 
+sock.sendall(("PC" + MercuryConfig.password).encode())
+
 controller = ControllerState()
 
 try:
@@ -36,11 +40,11 @@ try:
         for i in range(joystick.get_numaxes()):
             controller.axes.append(joystick.get_axis(i))
 
-        print(controller.axes)
-        print(controller.encode())
+        #print(controller.axes)
+        #print(controller.encode())
 
         sock.sendall(controller.encode())
 
-        pygame.time.wait(1000)
+        pygame.time.wait(200)
 finally:
     sock.close()

@@ -1,36 +1,28 @@
-import sys, pygame
 import socket
+import smbus
+import time
+from shared.ControllerState import ControllerState
+from shared.MercuryConfig import MercuryConfig
 
-pygame.init()
-pygame.joystick.init()
+bus = smbus.SMBus(1)
+address = 0x8
 
-pygame.display.set_mode((1,1))
+MercuryConfig.read()
 
-if pygame.joystick.get_count() == 0:
-    print("No joysticks found")
-    exit()
-
-joystick = pygame.joystick.Joystick(0)
-joystick.init()
+controller = ControllerState()
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.connect(("104.154.244.147", 8080))
 
-aPressed = False
+sock.sendall(("RPi" + MercuryConfig.password).encode())
 
 try:
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                sys.exit()
-
-        if joystick.get_button(0) and not aPressed:
-            sock.sendall("A pressed".encode())
-            print("A pressed")
-            aPressed = True
-        elif not joystick.get_button(0) and aPressed:
-            aPressed = False
-
-        pygame.time.wait(16)
+	while True:
+		buf = sock.recv(128) #How big does this need to be?
+		if len(buf) > 0:
+			controller.decode(buf.decode())
+		print(controller.axes)
+		print(controller.buttons)
+		bus.write_byte(address, int(controller.axes[0]*128 + 128))
 finally:
-    sock.close()
+	sock.close()

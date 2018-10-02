@@ -18,5 +18,6 @@ class ControllerState:
             self.axes[x] = float(results[x])
         i = 0
         for char in results[5]:
-            self.buttons[i] = int(char)
-            i += 1
+            if i < len(self.buttons):
+                self.buttons[i] = int(char)
+                i += 1
