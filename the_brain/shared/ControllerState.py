@@ -1,7 +1,7 @@
 class ControllerState:
     
     axes = [0.0,0.0,0.0,0.0,0.0]
-    buttons = [0,0,0,0,0,0,0,0,0,0]
+    buttons = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 
     def encode(self):
         encodedString = ""
@@ -12,12 +12,14 @@ class ControllerState:
         return encodedString.encode()
 
     def decode(self, string):
-        results = string.split(";")
-        print(results)
-        for x in range(5):
-            self.axes[x] = float(results[x])
-        i = 0
-        for char in results[5]:
-            if i < len(self.buttons):
-                self.buttons[i] = int(char)
-                i += 1
+        if string.startsWith("CC"):
+            string = results[2:]
+            results = string.split(";")
+            print(results)
+            for x in range(len(results)-1):
+                self.axes[x] = float(results[x])
+            i = 0
+            for char in results[len(results)-1]:
+                if i < len(self.buttons):
+                    self.buttons[i] = int(char)
+                    i += 1

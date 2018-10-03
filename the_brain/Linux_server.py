@@ -31,6 +31,6 @@ try:
 	while True:
 		buf = connectionPC.recv(128) #How big does this need to be?
 		if len(buf) > 0:
-			connectionRPi.sendall(buf)
+			connectionRPi.sendall(("CC" + buf.decode()).encode())
 finally:
 	serversocket.close()

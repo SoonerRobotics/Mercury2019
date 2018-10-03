@@ -20,7 +20,7 @@ joystick = pygame.joystick.Joystick(0)
 joystick.init()
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.connect(("104.154.244.147", 8080))
+sock.connect((MercuryConfig.ip, MercuryConfig.port))
 
 sock.sendall(("PC" + MercuryConfig.password).encode())
 
