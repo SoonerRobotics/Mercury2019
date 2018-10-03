@@ -12,7 +12,7 @@ class MercuryConfig:
         try:
             config.readfp(open('merc_bot.ini'))
             cls.ip = config.get('NETWORK', 'ip')
-            cls.port = config.get('NETWORK', 'port')
+            cls.port = int(config.get('NETWORK', 'port'))
             cls.password = config.get('NETWORK', 'password')
         except:
             print("Could not find merc_bot.ini, creating empty file. Please fill these in.")
