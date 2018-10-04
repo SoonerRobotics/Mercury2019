@@ -37,7 +37,7 @@ else:
 
 try:
 	while True:
-		buf = server.recv(controller.size())
+		buf = server.recv(ControllerState.size())
 		if len(buf) > 0:
 			controller.decode(buf)
 		print(controller.horizontal)
