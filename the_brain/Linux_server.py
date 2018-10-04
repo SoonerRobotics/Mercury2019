@@ -1,5 +1,7 @@
 import socket
 import struct
+import io
+import time
 import threading
 from shared.ControllerState import ControllerState
 from shared.MercuryConfig import MercuryConfig
@@ -113,7 +115,7 @@ def camserver():
 			
 
 	connection = connectionRPi.makefile('rb')
-	writeconnection = connectionPC.makefile('wb')
+	connectionw = connectionPC.makefile('wb')
 	try:
 		while True:
 			# Read the length of the image as a 32-bit unsigned int. If the
@@ -129,9 +131,6 @@ def camserver():
 			# Rewind the stream and send the image data over the wire
 			stream.seek(0)
 			connectionw.write(stream.read())
-			# If we've been capturing for more than 30 seconds, quit
-			if time.time() - start > 30:
-				break
 			# Reset the stream for the next capture
 			stream.seek(0)
 			stream.truncate()

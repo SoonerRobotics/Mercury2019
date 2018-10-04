@@ -1,6 +1,7 @@
 import socket
 import smbus
 import sys
+import io
 import threading
 import struct
 import time
@@ -111,7 +112,6 @@ def camserver():
         connection.write(struct.pack('<L', 0))
     finally:
         connection.close()
-        client_socket.close()
 
 threading.Thread(target = controlserver).start()
 threading.Thread(target = camserver).start()

@@ -150,12 +150,12 @@ while running:
             running = False
 
     if controllerFound:
-        text = font.render("Controller found", False, (0, 0, 0))
+        text = font.render("Controller found", True, (0, 0, 0))
     else:
-        text = font.render("No controller found", False, (0, 0, 0))
+        text = font.render("No controller found", True, (0, 0, 0))
 
-    text2 = font.render(serverConnected, False, (0, 0, 0))
-    text3 = font.render(server2Connected, False, (0, 0, 0))
+    text2 = font.render(serverConnected, True, (0, 0, 0))
+    text3 = font.render(server2Connected, True, (0, 0, 0))
 
     if not camimage == "":
         camimgstream = pygame.image.frombuffer(camimage)
