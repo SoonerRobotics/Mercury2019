@@ -22,34 +22,34 @@ while connectionPC == None or connectionRPi == None:
 		(c_id, c_pass) = str(struct.unpack(buf))
 		if c_id == "PC":
 			if connectionPC == None:
-				if c_pass = MercuryConfig.password:
+				if c_pass == MercuryConfig.password:
 					connectionPC = connection
 					if connectionRPi == None:
-						connection.sendall(stuct.pack("<B", 2))
+						connection.sendall(struct.pack("<B", 2))
 					else:
-						connection.sendall(stuct.pack("<B", 1))
-						connectionRPi.sendall(stuct.pack("<B", 3))
+						connection.sendall(struct.pack("<B", 1))
+						connectionRPi.sendall(struct.pack("<B", 3))
 				else:
-					connection.sendall(stuct.pack("<B", 42))
+					connection.sendall(struct.pack("<B", 42))
 			else:
-				connection.sendall(stuct.pack("<B", 43))
+				connection.sendall(struct.pack("<B", 43))
 		elif c_id == "RPi":
 			if connectionRPi == None:
-				if c_pass = MercuryConfig.password:
+				if c_pass == MercuryConfig.password:
 					connectionRPi = connection
 					if connectionPC == None:
-						connection.sendall(stuct.pack("<B", 2))
+						connection.sendall(struct.pack("<B", 2))
 					else:
-						connection.sendall(stuct.pack("<B", 1))
-						connectionPC.sendall(stuct.pack("<B", 3))
+						connection.sendall(struct.pack("<B", 1))
+						connectionPC.sendall(struct.pack("<B", 3))
 				else:
-					connection.sendall(stuct.pack("<B", 42))
+					connection.sendall(struct.pack("<B", 42))
 			else:
-				connection.sendall(stuct.pack("<B", 43))
+				connection.sendall(struct.pack("<B", 43))
 		else:
-			connection.sendall(stuct.pack("<B", 41))
+			connection.sendall(struct.pack("<B", 41))
 	else:
-		connection.sendall(stuct.pack("<B", 40))
+		connection.sendall(struct.pack("<B", 40))
 		
 
 try:

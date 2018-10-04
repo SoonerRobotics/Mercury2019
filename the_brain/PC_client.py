@@ -1,5 +1,6 @@
 import sys, pygame
 import socket
+import struct
 from shared.ControllerState import ControllerState
 from shared.MercuryConfig import MercuryConfig
 

@@ -1,5 +1,6 @@
 import socket
 import smbus
+import struct
 import time
 from shared.ControllerState import ControllerState
 from shared.MercuryConfig import MercuryConfig
@@ -11,8 +12,12 @@ MercuryConfig.read()
 
 controller = ControllerState()
 
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.connect((MercuryConfig.ip, MercuryConfig.port))
+try:
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.connect((MercuryConfig.ip, MercuryConfig.port))
+except ConnectionRefusedError as err:
+    print(err)
+    sys.exit(0)
 
 server.sendall(struct.pack("<3s20s", "RPi", MercuryConfig.password))
 response = struct.unpack("<B", server.recv(1))
