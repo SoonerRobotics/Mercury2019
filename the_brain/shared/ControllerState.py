@@ -2,7 +2,7 @@ import struct
 
 class ControllerState:
     
-    format = "<bb"
+    format = "<BB"
     horizontal = 0
     vertical = 0
 

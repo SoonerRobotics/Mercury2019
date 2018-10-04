@@ -1,5 +1,6 @@
 import socket
 import smbus
+import sys
 import struct
 import time
 from shared.ControllerState import ControllerState
@@ -17,7 +18,7 @@ try:
     server.connect((MercuryConfig.ip, MercuryConfig.port))
 except ConnectionRefusedError as err:
     print(err)
-    sys.exit(0)
+    sys.exit()
 
 handshake = "RP" + MercuryConfig.password
 server.sendall(struct.pack("<B29s", len(handshake), bytes(handshake, 'utf-8')))
@@ -32,7 +33,7 @@ elif response == 2:
         print("PC connected. Starting program.")
 else:
     print("Could not connect to server. Error code: " + str(response))
-    sys.exit(0)
+    sys.exit()
 
 try:
 	while True:
