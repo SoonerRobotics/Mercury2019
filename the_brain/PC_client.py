@@ -12,17 +12,32 @@ pygame.joystick.init()
 
 pygame.display.set_mode((1,1))
 
-if pygame.joystick.get_count() == 0:
-    print("No joysticks found")
-    exit()
+#if pygame.joystick.get_count() == 0:
+#    print("No joysticks found")
+#    exit()
 
-joystick = pygame.joystick.Joystick(0)
-joystick.init()
+#joystick = pygame.joystick.Joystick(0)
+#joystick.init()
 
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.connect((MercuryConfig.ip, MercuryConfig.port))
+try:
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.connect((MercuryConfig.ip, MercuryConfig.port))
+except ConnectionRefusedError as err:
+    print(err)
+    sys.exit(0)
 
-sock.sendall(("PC" + MercuryConfig.password).encode())
+server.sendall(struct.pack("<3s20s", "PC", MercuryConfig.password))
+response = struct.unpack("<B", server.recv(1))
+if response == 1:
+    print("Connected. RPi connected. Starting program.")
+elif response == 2:
+    print("Connected, waiting for RPi")
+    response = struct.unpack("<B", server.recv(1))
+    if response == 3:
+        print("RPi connected. Starting program.")
+else:
+    print("Could not connect to server. Error code: " + response)
+    sys.exit(0)
 
 controller = ControllerState()
 
@@ -32,23 +47,14 @@ try:
             if event.type == pygame.QUIT:
                 sys.exit()
 
-        controller.buttons.clear()
-        for i in range(joystick.get_numbuttons()):
-            controller.buttons.append(joystick.get_button(i))
+        horz = int(joystick.get_axis(0) * 128 + 128)
+        vert = int(joystick.get_axis(1) * 128 + 128)
 
-        controller.axes.clear()
-        for i in range(joystick.get_numaxes()):
-            axisval = joystick.get_axis(i)
-            axisval = int(axisval * 128.0 + 128.0)
-            if axisval > 108 and axisval < 148:
-                axisval = 128
-            controller.axes.append(axisval)
+        controller.horizontal = horz
+        controller.vertical = vert
 
-        #print(controller.axes)
-        #print(controller.encode())
-
-        sock.sendall(controller.encode())
+        server.sendall(controller.encode())
 
         pygame.time.wait(100)
 finally:
-    sock.close()
+    server.close()
