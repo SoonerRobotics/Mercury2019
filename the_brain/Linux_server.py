@@ -120,12 +120,13 @@ def camserver():
 		while True:
 			# Read the length of the image as a 32-bit unsigned int. If the
 			# length is zero, quit the loop
-			image_len = struct.unpack('<L', connectionRPi.recv(4))[0]
+			image_len = struct.unpack('<L', connection.read(4))[0]
 			if not image_len:
-				break
+				continue
 			# Construct a stream to hold the image data and read the image
 			# data from the connection
 			stream = io.BytesIO()
+			stream.write(connection.read(image_len))
 			connectionw.write(struct.pack('<L', stream.tell()))
 			connectionw.flush()
 			# Rewind the stream and send the image data over the wire

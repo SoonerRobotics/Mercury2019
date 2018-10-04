@@ -1,8 +1,10 @@
 import sys, pygame
 import socket
 import struct
+import io
 import threading
 import time
+from PIL import Image
 from shared.ControllerState import ControllerState
 from shared.MercuryConfig import MercuryConfig
 
@@ -82,6 +84,7 @@ def inputHandler():
         server.close()
 
 def cameraHandler():
+    global server2Connected
     global camimage
     while True:
         try:
@@ -114,17 +117,22 @@ def cameraHandler():
         while True:
             # Read the length of the image as a 32-bit unsigned int. If the
             # length is zero, quit the loop
-            image_len = struct.unpack('<L', server.recv(4))[0]
+            image_len = struct.unpack('<L', connection.read(4))[0]
             if not image_len:
-                break
+                continue
             # Construct a stream to hold the image data and read the image
             # data from the connection
             image_stream = io.BytesIO()
             image_stream.write(connection.read(image_len))
+            print("Found image of size" + str(image_len))
             # Rewind the stream, open it as an image with PIL and do some
             # processing on it
             image_stream.seek(0)
-            camimage = image_stream
+            image = Image.open(image_stream)
+            print('Image is %dx%d' % image.size)
+            image.verify()
+            print('Image is verified')
+            break
     finally:
         connection.close()
         server.close()
@@ -158,7 +166,7 @@ while running:
     text3 = font.render(server2Connected, True, (0, 0, 0))
 
     if not camimage == "":
-        camimgstream = pygame.image.frombuffer(camimage)
+        camimgstream = pygame.image.frombuffer(camimage, (640, 480), "RGB")
 
     screen.fill((255,255,255))
     
