@@ -69,7 +69,7 @@ def inputHandler():
                 if event.type == pygame.QUIT:
                     sys.exit()
 
-            horz = int(joystick.get_axis(0) * 128 + 128)
+            horz = int(joystick.get_axis(1) * 128 + 128)
             vert = int(joystick.get_axis(3) * 128 + 128)
 
             controller.horizontal = horz
@@ -114,7 +114,7 @@ def cameraHandler():
         while True:
             # Read the length of the image as a 32-bit unsigned int. If the
             # length is zero, quit the loop
-            image_len = struct.unpack('<L', connection.read(struct.calcsize('<L')))[0]
+            image_len = struct.unpack('<L', server.recv(4))[0]
             if not image_len:
                 break
             # Construct a stream to hold the image data and read the image
@@ -127,7 +127,7 @@ def cameraHandler():
             camimage = image_stream
     finally:
         connection.close()
-        server_socket.close()
+        server.close()
 
 threading.Thread(target = inputHandler).start()
 threading.Thread(target = cameraHandler).start()

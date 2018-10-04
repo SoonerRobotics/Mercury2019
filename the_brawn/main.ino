@@ -27,17 +27,21 @@ void receiveEvent(int howMany) {
         int number = Wire.read();
         //Serial.print("data received: ");
         //Serial.println(number);
+        Serial.print(number);
+        Serial.print(" ");
 
         if (counter == 0){
             motorA.output((number - 128)/128.0);
         }
 
-        if (counter == 2){
+        if (counter == 1){
             motorB.output((number - 128)/128.0);
         }
 
         counter++;
     }
+
+    Serial.println();
 
     digitalWrite(13, LOW);
 }
