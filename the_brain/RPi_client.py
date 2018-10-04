@@ -31,12 +31,12 @@ elif response == 2:
     if response == 3:
         print("PC connected. Starting program.")
 else:
-    print("Could not connect to server. Error code: " + str(response)
+    print("Could not connect to server. Error code: " + str(response))
     sys.exit(0)
 
 try:
 	while True:
-		buf = server.recv(ControllerState.size())
+		buf = server.recv(controller.size())
 		if len(buf) > 0:
 			controller.decode(buf)
 		print(controller.horizontal)

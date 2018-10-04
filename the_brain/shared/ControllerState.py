@@ -7,12 +7,12 @@ class ControllerState:
     vertical = 0
 
     def encode(self):
-        return struct.pack(format, horizontal, vertical)
+        return struct.pack(self.format, self.horizontal, self.vertical)
 
     def size(self):
-        return struct.calcsize(format)
+        return struct.calcsize(self.format)
 
     def decode(self, binarydata):
-        unpacked = struct.unpack(format, binarydata)
-        horizontal = unpacked[0]
-        vertical = unpacked[1]
+        unpacked = struct.unpack(self.format, binarydata)
+        self.horizontal = unpacked[0]
+        self.vertical = unpacked[1]
