@@ -19,7 +19,9 @@ except ConnectionRefusedError as err:
     print(err)
     sys.exit(0)
 
-server.sendall(struct.pack("<3s20s", "RPi", MercuryConfig.password))
+handshake = "RP" + MercuryConfig.password
+server.sendall(struct.pack("<B29s", len(handshake), bytes(handshake, 'utf-8')))
+
 response = struct.unpack("<B", server.recv(1))
 if response == 1:
     print("Connected. PC connected. Starting program.")

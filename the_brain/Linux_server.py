@@ -19,7 +19,10 @@ while connectionPC == None or connectionRPi == None:
 	buf = connection.recv(23) #struct.calcsize('<3s20s')
 
 	if len(buf) > 0:
-		(c_id, c_pass) = str(struct.unpack(buf))
+		blen, bstr = struct.unpack("<B29s", buf)
+		rstr = bstr.decode('utf-8')
+		c_id = rstr[:3]
+		c_pass = rstr[3:blen]
 		if c_id == "PC":
 			if connectionPC == None:
 				if c_pass == MercuryConfig.password:
@@ -33,7 +36,7 @@ while connectionPC == None or connectionRPi == None:
 					connection.sendall(struct.pack("<B", 42))
 			else:
 				connection.sendall(struct.pack("<B", 43))
-		elif c_id == "RPi":
+		elif c_id == "RP":
 			if connectionRPi == None:
 				if c_pass == MercuryConfig.password:
 					connectionRPi = connection
