@@ -8,6 +8,8 @@ void setup() {
     Wire.begin(0x8);                // join i2c bus with address #8
     Wire.onReceive(receiveEvent); // register event
 
+    pinMode(13, OUTPUT);
+
     motorA.begin(4,5,3);
     motorB.begin(7,8,6);
 }
@@ -17,10 +19,9 @@ void loop() {
 }
 
 void receiveEvent(int howMany) {
-    if(howMany!=2){
-        return;
-    }
-    
+
+    digitalWrite(13, HIGH);
+
     int counter = 0;
     while(Wire.available()) {
         int number = Wire.read();
@@ -31,12 +32,14 @@ void receiveEvent(int howMany) {
             motorA.output((number - 128)/128.0);
         }
 
-        if (counter == 1){
+        if (counter == 2){
             motorB.output((number - 128)/128.0);
         }
 
         counter++;
     }
+
+    digitalWrite(13, LOW);
 }
 
 int lerp(int start, int end, float fraction) {

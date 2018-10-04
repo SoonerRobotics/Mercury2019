@@ -48,12 +48,12 @@ def controlserver() :
                 controller.vertical = 128
             if controller.horizontal > 108 and controller.horizontal < 148:
                 controller.horizontal = 128
-            print(str(controller.vertical) + ", " + str(controller.vertical))
+            print(str(controller.vertical) + ", " + str(controller.horizontal))
             bus.write_i2c_block_data(address, 0, [controller.vertical, controller.horizontal] )
     finally:
         server.close()
 
-def webserver():
+def camserver():
     try:
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server.connect((MercuryConfig.ip, MercuryConfig.port+1))
