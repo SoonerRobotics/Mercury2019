@@ -26,12 +26,12 @@ void loop() {
     }
     if (curSpeed != targetSpeed) {
         curTicks++;
-        curSpeed = lerp(curSpeed, targetSpeed, ((float)curTicks)/10); //Lerp over 100 milliseconds (depends on delay below)
-        motorA.output(curSpeed);
-        motorB.output(curSpeed);
+        curSpeed = lerp(curSpeed, targetSpeed, curTicks/10.0); //Lerp over 50 milliseconds (depends on delay below)
+        motorA.output(curSpeed/128.0);
+        motorB.output(curSpeed/128.0);
     }
 
-    delay(10);
+    delay(5);
 }
 
 void receiveEvent(int howMany) {
@@ -40,11 +40,10 @@ void receiveEvent(int howMany) {
         //Serial.print("data received: ");
         //Serial.println(number);
 
-        float motorOutput = (number - 128) / 128.0;
-        targetSpeed = motorOutput;
+        targetSpeed = number - 128;
     }
 }
 
-float lerp(float start, float end, float fraction) {
-  return start + (end - start) * fraction; //linear interpolation
+int lerp(int start, int end, float fraction) {
+  return (int)(start + (end - start) * fraction); //linear interpolation
 }

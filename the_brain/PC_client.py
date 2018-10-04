@@ -39,9 +39,9 @@ try:
         controller.axes.clear()
         for i in range(joystick.get_numaxes()):
             axisval = joystick.get_axis(i)
-            axisval = int(axisval * 256)
-            if (axisval < 20)
-                axisval = 0
+            axisval = int(axisval * 128.0 + 128.0)
+            if axisval > 108 and axisval < 148:
+                axisval = 128
             controller.axes.append(axisval)
 
         #print(controller.axes)
