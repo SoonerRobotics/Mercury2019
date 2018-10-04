@@ -38,13 +38,17 @@ try:
 
         controller.axes.clear()
         for i in range(joystick.get_numaxes()):
-            controller.axes.append(joystick.get_axis(i))
+            axisval = joystick.get_axis(i)
+            axisval = int(axisval * 256)
+            if (axisval < 20)
+                axisval = 0
+            controller.axes.append(axisval)
 
         #print(controller.axes)
         #print(controller.encode())
 
         sock.sendall(controller.encode())
 
-        pygame.time.wait(200)
+        pygame.time.wait(100)
 finally:
     sock.close()

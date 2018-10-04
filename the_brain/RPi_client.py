@@ -23,6 +23,6 @@ try:
 			controller.decode(buf.decode())
 		print(controller.axes)
 		print(controller.buttons)
-		bus.write_byte(address, int(controller.axes[0]*128 + 128))
+		bus.write_byte(address, int(controller.axes[0]))
 finally:
 	sock.close()
