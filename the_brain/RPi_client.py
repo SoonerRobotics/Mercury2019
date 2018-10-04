@@ -12,7 +12,7 @@ MercuryConfig.read()
 controller = ControllerState()
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.connect(("104.154.244.147", 8080))
+sock.connect((MercuryConfig.ip, MercuryConfig.port))
 
 sock.sendall(("RPi" + MercuryConfig.password).encode())
 
@@ -23,6 +23,6 @@ try:
 			controller.decode(buf.decode())
 		print(controller.axes)
 		print(controller.buttons)
-		bus.write_byte(address, int(controller.axes[0]*128 + 128))
+		bus.write_byte(address, int(controller.axes[1]))
 finally:
 	sock.close()

@@ -20,7 +20,7 @@ joystick = pygame.joystick.Joystick(0)
 joystick.init()
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.connect(("104.154.244.147", 8080))
+sock.connect((MercuryConfig.ip, MercuryConfig.port))
 
 sock.sendall(("PC" + MercuryConfig.password).encode())
 
@@ -38,13 +38,17 @@ try:
 
         controller.axes.clear()
         for i in range(joystick.get_numaxes()):
-            controller.axes.append(joystick.get_axis(i))
+            axisval = joystick.get_axis(i)
+            axisval = int(axisval * 128.0 + 128.0)
+            if axisval > 108 and axisval < 148:
+                axisval = 128
+            controller.axes.append(axisval)
 
         #print(controller.axes)
         #print(controller.encode())
 
         sock.sendall(controller.encode())
 
-        pygame.time.wait(200)
+        pygame.time.wait(100)
 finally:
     sock.close()

@@ -8,7 +8,7 @@ controller = ControllerState()
 
 serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-serversocket.bind(('0.0.0.0', 8080))
+serversocket.bind(('0.0.0.0', MercuryConfig.port))
 serversocket.listen(1)
 
 connectionPC, connectionRPi = None, None
@@ -31,6 +31,6 @@ try:
 	while True:
 		buf = connectionPC.recv(128) #How big does this need to be?
 		if len(buf) > 0:
-			connectionRPi.sendall(buf)
+			connectionRPi.sendall(("CC" + buf.decode()).encode())
 finally:
 	serversocket.close()
