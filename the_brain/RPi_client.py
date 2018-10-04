@@ -22,7 +22,7 @@ except ConnectionRefusedError as err:
 handshake = "RP" + MercuryConfig.password
 server.sendall(struct.pack("<B29s", len(handshake), bytes(handshake, 'utf-8')))
 
-response = struct.unpack("<B", server.recv(1))
+response = struct.unpack("<B", server.recv(1))[0]
 if response == 1:
     print("Connected. PC connected. Starting program.")
 elif response == 2:
@@ -31,7 +31,7 @@ elif response == 2:
     if response == 3:
         print("PC connected. Starting program.")
 else:
-    print("Could not connect to server. Error code: " + response)
+    print("Could not connect to server. Error code: " + str(response)
     sys.exit(0)
 
 try:

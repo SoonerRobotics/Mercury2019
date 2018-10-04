@@ -13,12 +13,12 @@ pygame.joystick.init()
 
 pygame.display.set_mode((1,1))
 
-#if pygame.joystick.get_count() == 0:
-#    print("No joysticks found")
-#    exit()
+if pygame.joystick.get_count() == 0:
+    print("No joysticks found")
+    exit()
 
-#joystick = pygame.joystick.Joystick(0)
-#joystick.init()
+joystick = pygame.joystick.Joystick(0)
+joystick.init()
 
 try:
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -30,7 +30,7 @@ except ConnectionRefusedError as err:
 handshake = "PC" + MercuryConfig.password
 server.sendall(struct.pack("<B29s", len(handshake), bytes(handshake, 'utf-8')))
 
-response = struct.unpack("<B", server.recv(1))
+response = struct.unpack("<B", server.recv(1))[0]
 if response == 1:
     print("Connected. RPi connected. Starting program.")
 elif response == 2:
@@ -39,7 +39,7 @@ elif response == 2:
     if response == 3:
         print("RPi connected. Starting program.")
 else:
-    print("Could not connect to server. Error code: " + response)
+    print("Could not connect to server. Error code: " + str(response))
     sys.exit(0)
 
 controller = ControllerState()
