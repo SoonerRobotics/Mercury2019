@@ -3,16 +3,19 @@ import struct
 class ControllerState:
     
     strFormat = "<BB"
-    horizontal = 0
-    vertical = 0
+
+    def __init__(self):
+        self.horizontal = 0
+        self.vertical = 0
 
     def encode(self):
-        return struct.pack(strFormat, self.horizontal, self.vertical)
+        return struct.pack(self.strFormat, self.horizontal, self.vertical)
 
-    def size():
-        return struct.calcsize(strFormat)
+    @classmethod
+    def size(cls):
+        return struct.calcsize(cls.strFormat)
 
     def decode(self, binarydata):
-        unpacked = struct.unpack(strFormat, binarydata)
+        unpacked = struct.unpack(self.strFormat, binarydata)
         self.horizontal = unpacked[0]
         self.vertical = unpacked[1]
