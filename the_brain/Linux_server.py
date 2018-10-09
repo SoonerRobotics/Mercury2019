@@ -1,36 +1,31 @@
-import socket
-from shared.ControllerState import ControllerState
+import threading
 from shared.MercuryConfig import MercuryConfig
+from shared.MercuryConnection import MercuryServer
 
-MercuryConfig.read()
+conf = MercuryConfig()
 
-controller = ControllerState()
 
-serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-serversocket.bind(('0.0.0.0', MercuryConfig.port))
-serversocket.listen(1)
+def controlserver():
+    server = MercuryServer()
+    server.connect(conf.port, conf.password)
 
-connectionPC, connectionRPi = None, None
+    try:
+        while True:
+            server.send(server.get("PC"), "RP")  # Redirect PC to RP
+    finally:
+        server.close()
 
-while connectionPC == None or connectionRPi == None:
-	connection, address = serversocket.accept()
-	buf = connection.recv(128) #How big does this need to be?
 
-	if len(buf) > 0:
-		string = str(buf.decode())
-		if string.startswith("PC") and string.endswith(MercuryConfig.password):
-			connectionPC = connection
-		elif string.startswith("RPi") and string.endswith(MercuryConfig.password):
-			connectionRPi = connection
-		else:
-			connection.sendall("Wrong credentials.")
-			connection.close()
+def camserver():
+    server = MercuryServer()
+    server.connect(conf.port + 1, conf.password)
 
-try:
-	while True:
-		buf = connectionPC.recv(128) #How big does this need to be?
-		if len(buf) > 0:
-			connectionRPi.sendall(("CC" + buf.decode()).encode())
-finally:
-	serversocket.close()
+    try:
+        while True:
+            server.send(server.get("RP"), "PC")  # Redirect RP to PC
+    finally:
+        server.close()
+
+
+threading.Thread(target=controlserver).start()
+threading.Thread(target=camserver).start()

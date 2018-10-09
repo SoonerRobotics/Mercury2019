@@ -4,44 +4,46 @@
 Motor motorA;
 Motor motorB;
 
-int number = 0;
-
-int curSpeed = 0;
-int lastTargetSpeed = 0;
-int targetSpeed = 0;
-
 void setup() {
     Wire.begin(0x8);                // join i2c bus with address #8
     Wire.onReceive(receiveEvent); // register event
+
+    pinMode(13, OUTPUT);
 
     motorA.begin(4,5,3);
     motorB.begin(7,8,6);
 }
 
-int curTicks = 0;
 void loop() {
-    if (targetSpeed != lastTargetSpeed) {
-        lastTargetSpeed = targetSpeed;
-        curTicks = 0;
-    }
-    if (curSpeed != targetSpeed) {
-        curTicks++;
-        curSpeed = lerp(curSpeed, targetSpeed, curTicks/10.0); //Lerp over 50 milliseconds (depends on delay below)
-        motorA.output(curSpeed/128.0);
-        motorB.output(curSpeed/128.0);
-    }
-
-    delay(5);
+    delay(100);
 }
 
 void receiveEvent(int howMany) {
+
+    digitalWrite(13, HIGH);
+
+    int counter = 0;
     while(Wire.available()) {
-        number = Wire.read();
+        int number = Wire.read();
         //Serial.print("data received: ");
         //Serial.println(number);
+        Serial.print(number);
+        Serial.print(" ");
 
-        targetSpeed = number - 128;
+        if (counter == 0){
+            motorA.output((number - 128)/128.0);
+        }
+
+        if (counter == 1){
+            motorB.output((number - 128)/128.0);
+        }
+
+        counter++;
     }
+
+    Serial.println();
+
+    digitalWrite(13, LOW);
 }
 
 int lerp(int start, int end, float fraction) {
