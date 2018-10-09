@@ -1,75 +1,57 @@
 import sys, pygame
-import socket
-import struct
 import io
 import threading
 import time
 from PIL import Image
-from shared.ControllerState import ControllerState
 from shared.MercuryConfig import MercuryConfig
+from shared.MercuryConnection import MercuryConnection
+from shared.ControllerState import ControllerState
 
-MercuryConfig.read()
+conf = MercuryConfig()
 
 pygame.init()
-
-screen = pygame.display.set_mode((600,400))
+screen = pygame.display.set_mode((640, 480))
 pygame.display.set_caption("Mercury 2019 GUI")
 
 running = True
 
 controllerFound = False
-serverConnected = "Searching for control server..."
-server2Connected = "Searching for cam server..."
+controlStatus = "Searching for control server..."
+camStatus = "Searching for cam server..."
 
-camimage = ""
+camimgstream = None
+
+t1Stop = False
+t2Stop = False
+
 
 def inputHandler():
     global controllerFound
-    global serverConnected
+    global controlStatus
     while True:
+        if t1Stop:
+            return
         pygame.joystick.init()
         if pygame.joystick.get_count() > 0:
             controllerFound = True
             break
-        time.sleep(0.1) 
+        time.sleep(0.5)
         pygame.joystick.quit()
 
     joystick = pygame.joystick.Joystick(0)
     joystick.init()
 
-    while True:
-        try:
-            server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            server.connect((MercuryConfig.ip, MercuryConfig.port))
-            break
-        except ConnectionRefusedError as err:
-            time.sleep(3)
+    server = MercuryConnection("PC")
+    server.connect(conf.ip, conf.port, conf.password)
 
-    handshake = "PC" + MercuryConfig.password
-    server.sendall(struct.pack("<B29s", len(handshake), bytes(handshake, 'utf-8')))
-
-    response = struct.unpack("<B", server.recv(1))[0]
-    if response == 1:
-        print("Connected. RPi connected. Starting program.")
-        serverConnected = "Connected to control server"
-    elif response == 2:
-        print("Connected, waiting for RPi")
-        serverConnected = "Connected to control server"
-        response = struct.unpack("<B", server.recv(1))
-        if response == 3:
-            print("RPi connected. Starting program.")
-    else:
-        print("Could not connect to server. Error code: " + str(response))
-        serverConnected = "Could not connect to control server. Error code: " + str(response)
-        sys.exit()
+    controlStatus = "Connected to control server"
 
     controller = ControllerState()
 
     try:
         while True:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    sys.exit()
+            if t1Stop:
+                break
 
             horz = int(joystick.get_axis(1) * 128 + 128)
             vert = int(joystick.get_axis(3) * 128 + 128)
@@ -77,70 +59,46 @@ def inputHandler():
             controller.horizontal = horz
             controller.vertical = vert
 
-            server.sendall(controller.encode())
+            server.send(controller.encode())
 
             pygame.time.wait(100)
     finally:
         server.close()
 
+
 def cameraHandler():
-    global server2Connected
-    global camimage
-    while True:
-        try:
-            server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            server.connect((MercuryConfig.ip, MercuryConfig.port + 1))
-            break
-        except ConnectionRefusedError as err:
-            time.sleep(3)
+    global camStatus
+    global camimgstream
+    global t2Stop
 
-    handshake = "PC" + MercuryConfig.password
-    server.sendall(struct.pack("<B29s", len(handshake), bytes(handshake, 'utf-8')))
+    server = MercuryConnection("PC")
+    server.connect(conf.ip, conf.port + 1, conf.password)
 
-    response = struct.unpack("<B", server.recv(1))[0]
-    if response == 1:
-        print("Connected. RPi connected. Starting program.")
-        server2Connected = "Connected to web server"
-    elif response == 2:
-        print("Connected, waiting for RPi")
-        server2Connected = "Connected to web server"
-        response = struct.unpack("<B", server.recv(1))
-        if response == 3:
-            print("RPi connected. Starting program.")
-    else:
-        print("Could not connect to server. Error code: " + str(response))
-        server2Connected = "Could not connect to web server. Error code: " + str(response)
-        sys.exit()
+    camStatus = "Connected to cam server"
 
-    connection = server.makefile('rb')
+    connection = server.connection.makefile('rb')
     try:
         while True:
-            # Read the length of the image as a 32-bit unsigned int. If the
-            # length is zero, quit the loop
-            image_len = struct.unpack('<L', connection.read(4))[0]
-            if not image_len:
-                continue
+            if t2Stop:
+                break
             # Construct a stream to hold the image data and read the image
             # data from the connection
-            image_stream = io.BytesIO()
-            image_stream.write(connection.read(image_len))
-            print("Found image of size" + str(image_len))
+            image_stream = io.StringIO(server.get())
             # Rewind the stream, open it as an image with PIL and do some
             # processing on it
             image_stream.seek(0)
             image = Image.open(image_stream)
-            print('Image is %dx%d' % image.size)
-            image.verify()
-            print('Image is verified')
-            break
+            camimgstream = pygame.image.frombuffer(image.tobytes("raw"), (640, 480), "RGB")
+
     finally:
         connection.close()
         server.close()
 
-threading.Thread(target = inputHandler).start()
-threading.Thread(target = cameraHandler).start()
 
-
+t1 = threading.Thread(target=inputHandler)
+t1.start()
+t2 = threading.Thread(target=cameraHandler)
+t2.start()
 
 ##MAIN##
 
@@ -148,33 +106,38 @@ font = pygame.font.SysFont("arial", 24)
 
 # main loop
 while running:
-    controllerFound
 
     # event handling, gets all event from the eventqueue
     for event in pygame.event.get():
         # only do something if the event is of type QUIT
         if event.type == pygame.QUIT:
             # change the value to False, to exit the main loop
+            t1Stop = t2Stop = True
             running = False
 
+    pressed = pygame.key.get_pressed()
+    if pressed[pygame.K_ESCAPE]:
+        t1Stop = t2Stop = True
+        running = False
+
     if controllerFound:
-        text = font.render("Controller found", True, (0, 0, 0))
+        controllerStatus = font.render("Controller found", True, (0, 0, 0))
     else:
-        text = font.render("No controller found", True, (0, 0, 0))
+        controllerStatus = font.render("No controller found", True, (0, 0, 0))
 
-    text2 = font.render(serverConnected, True, (0, 0, 0))
-    text3 = font.render(server2Connected, True, (0, 0, 0))
+    controlText = font.render(controlStatus, True, (0, 0, 0))
+    camText = font.render(camStatus, True, (0, 0, 0))
 
-    if not camimage == "":
-        camimgstream = pygame.image.frombuffer(camimage, (640, 480), "RGB")
+    screen.fill((255, 255, 255))
 
-    screen.fill((255,255,255))
-    
-    if not camimage == "":
-        screen.blit(camimgstream, (0,0))
+    if not camimgstream is None:
+        screen.blit(camimgstream, (0, 0))
 
-    screen.blit(text, (10, 10))
-    screen.blit(text2, (10, 20 + text2.get_height()))
-    screen.blit(text3, (10, 30 + 2 * text2.get_height()))
+    screen.blit(controllerStatus, (10, 10))
+    screen.blit(controlText, (10, 20 + controlText.get_height()))
+    screen.blit(camText, (10, 30 + 2 * camText.get_height()))
 
     pygame.display.flip()
+
+t1.join()
+t2.join()

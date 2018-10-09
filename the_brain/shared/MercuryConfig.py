@@ -1,19 +1,20 @@
 import configparser
+from typing import Any, Union
+
 
 class MercuryConfig:
 
-    ip = ""
-    port = ""
-    password = ""
-    
-    @classmethod
-    def read(cls):
+    def __init__(self):
+        self.ip = ""
+        self.port = ""
+        self.password = ""
+
         config = configparser.ConfigParser()
         try:
-            config.readfp(open('merc_bot.ini'))
-            cls.ip = config.get('NETWORK', 'ip')
-            cls.port = int(config.get('NETWORK', 'port'))
-            cls.password = config.get('NETWORK', 'password')
+            config.read_file(open('merc_bot.ini'))
+            self.ip = config.get('NETWORK', 'ip')
+            self.port = int(config.get('NETWORK', 'port'))
+            self.password = config.get('NETWORK', 'password')
         except:
             print("Could not find merc_bot.ini, creating empty file. Please fill these in.")
             config['NETWORK'] = {"ip":"", "port":"", "password":""}
