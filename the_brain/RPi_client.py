@@ -36,8 +36,8 @@ def controlserver():
 
 def camserver():
 
-    server = MercuryConnection("PC")
-    server.connect(conf.ip, conf.port, conf.password)
+    server = MercuryConnection("RP")
+    server.connect(conf.ip, conf.port + 1, conf.password)
 
     # Make a file-like object out of the connection
     try:
