@@ -18,7 +18,7 @@ def controlserver():
 
 def camserver():
     server = MercuryServer()
-    server.connect(conf.port, conf.password)
+    server.connect(conf.port + 1, conf.password)
 
     try:
         while True:

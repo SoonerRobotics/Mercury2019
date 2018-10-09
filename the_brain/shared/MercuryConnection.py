@@ -18,7 +18,7 @@ def _get_chunk(c, length: int):
         return ''
     buf = ''
     while len(buf) < length:
-        buf2 = c.recv(length - len(buf))
+        buf2 = str(c.recv(length - len(buf)))
         if not buf2:
             if buf:
                 raise RuntimeError("Connection to server lost.")
@@ -29,8 +29,6 @@ def _get_chunk(c, length: int):
 
 
 class MercuryConnection:
-    id: str
-    connection: socket
 
     def __init__(self, id: str):
         self.id = id
@@ -79,9 +77,6 @@ class MercuryConnection:
 
 
 class MercuryServer:
-    server: socket
-    connectionPC: socket
-    connectionRPi: socket
 
     def __init__(self):
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -112,7 +107,6 @@ class MercuryServer:
             raise RuntimeError("Attempt to get data from unknown device")
 
     def connect(self, port, password):
-        self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.server.bind(('0.0.0.0', port))
         self.server.listen(3)
 
