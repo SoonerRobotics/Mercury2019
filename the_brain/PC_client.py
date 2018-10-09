@@ -83,12 +83,12 @@ def cameraHandler():
                 break
             # Construct a stream to hold the image data and read the image
             # data from the connection
-            image_stream = io.StringIO(server.get())
+            image_stream = io.BytesIO(server.get())
             # Rewind the stream, open it as an image with PIL and do some
             # processing on it
             image_stream.seek(0)
             image = Image.open(image_stream)
-            camimgstream = pygame.image.frombuffer(image.tobytes("raw"), (640, 480), "RGB")
+            camimgstream = pygame.image.frombuffer(image.tobytes("raw"), (320, 240), "RGB")
 
     finally:
         connection.close()
@@ -131,7 +131,7 @@ while running:
     screen.fill((255, 255, 255))
 
     if not camimgstream is None:
-        screen.blit(camimgstream, (0, 0))
+        screen.blit(camimgstream, (260, 0))
 
     screen.blit(controllerStatus, (10, 10))
     screen.blit(controlText, (10, 20 + controlText.get_height()))

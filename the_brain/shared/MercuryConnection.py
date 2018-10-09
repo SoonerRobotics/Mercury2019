@@ -3,7 +3,6 @@ import struct
 import sys
 import time
 
-FIXED_SEND_LENGTH = 1024
 HEADER_TYPE = '>I'
 HEADER_TYPE_SIZE = struct.calcsize(HEADER_TYPE)
 
