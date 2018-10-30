@@ -5,6 +5,9 @@ Motor motorA;
 Motor motorB;
 
 void setup() {
+
+    Serial.begin(9600);
+
     Wire.begin(0x8);                // join i2c bus with address #8
     Wire.onReceive(receiveEvent); // register event
 
@@ -30,11 +33,11 @@ void receiveEvent(int howMany) {
         Serial.print(number);
         Serial.print(" ");
 
-        if (counter == 0){
+        if (counter == 1){
             motorA.output((number - 128)/128.0);
         }
 
-        if (counter == 1){
+        if (counter == 2){
             motorB.output((number - 128)/128.0);
         }
 
