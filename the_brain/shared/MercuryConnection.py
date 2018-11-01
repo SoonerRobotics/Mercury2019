@@ -8,8 +8,10 @@ HEADER_TYPE_SIZE = struct.calcsize(HEADER_TYPE)
 
 
 def _send_chunk(c, msg):
+    print("msglen: " + str(len(msg)))
     while msg:
         msg = msg[c.send(msg):]
+        print("newlen: " + str(len(msg)))
 
 
 def _get_chunk(c, length: int):
