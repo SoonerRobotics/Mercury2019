@@ -1,54 +1,35 @@
-#include "RobotLib.h"
-#include <Wire.h>
+#include "Motor.h" //from RobotLib
 
 Motor motorA;
 Motor motorB;
 
+struct Instruction  {
+  float leftMotor;
+  float rightMotor;
+};
+
+union InstructionPacket  {
+  Instruction data;
+  byte buffr[sizeof(Instruction)];
+};
+
 void setup() {
-
-    Serial.begin(9600);
-
-    Wire.begin(0x8);                // join i2c bus with address #8
-    Wire.onReceive(receiveEvent); // register event
-
-    pinMode(13, OUTPUT);
-
-    motorA.begin(4,5,3);
-    motorB.begin(7,8,6);
+  Serial.begin(9600);
+  
+  motorA.begin(4,5,3);
+  motorB.begin(7,8,6);
 }
 
 void loop() {
-    delay(100);
-}
-
-void receiveEvent(int howMany) {
-
-    digitalWrite(13, HIGH);
-
-    int counter = 0;
-    while(Wire.available()) {
-        int number = Wire.read();
-        //Serial.print("data received: ");
-        //Serial.println(number);
-        Serial.print(number);
-        Serial.print(" ");
-
-        if (counter == 1){
-            motorA.output((number - 128)/128.0);
-        }
-
-        if (counter == 2){
-            motorB.output((number - 128)/128.0);
-        }
-
-        counter++;
+  // send data only when you receive data:
+  if (Serial.available() > 0) {
+  
+    InstructionPacket packet;
+    
+    if (Serial.readBytes(packet.buffr, sizeof(packet.buffr)) == sizeof(packet.buffr)) { //read all the bytes that make up an instruction packet into the packet buffer
+      Instruction instruction = packet.data;
+      motorA.output(instruction.leftMotor);
+      motorB.output(instruction.rightMotor);
     }
-
-    Serial.println();
-
-    digitalWrite(13, LOW);
-}
-
-int lerp(int start, int end, float fraction) {
-  return (int)(start + (end - start) * fraction); //linear interpolation
+  }
 }
