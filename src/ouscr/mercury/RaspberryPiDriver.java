@@ -40,7 +40,7 @@ public class RaspberryPiDriver {
         while (running) {
             Frame in = connection.receiveFrame();
             if (in.type == Frame.FrameType.ROBOT) {
-                LOGGER.log(Level.FINE, "Robot Instructions: " + Arrays.toString(in.bytes));
+                //LOGGER.log(Level.FINE, "Robot Instructions: " + Arrays.toString(in.bytes));
                 System.out.println("[" + in.bytes.length + "] " + in.bytes[0] + ", " + in.bytes[1]);
                 comPort.writeBytes(in.bytes, in.bytes.length);
             }
