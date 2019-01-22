@@ -17,6 +17,7 @@ public class RaspberryPiDriver {
 
     public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
 
+        LOGGER.setLevel(Level.ALL);
 
         boolean running = true;
 
@@ -40,6 +41,7 @@ public class RaspberryPiDriver {
             Frame in = connection.receiveFrame();
             if (in.type == Frame.FrameType.ROBOT) {
                 LOGGER.log(Level.FINE, "Robot Instructions: " + Arrays.toString(in.bytes));
+                System.out.println("[" + in.bytes.length + "] " + in.bytes[0] + ", " + in.bytes[1]);
                 comPort.writeBytes(in.bytes, in.bytes.length);
             }
         }
