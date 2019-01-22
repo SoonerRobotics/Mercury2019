@@ -30,7 +30,7 @@ public class RaspberryPiDriver {
             comPort = getArduinoPort(comPorts);
         }
 
-        ClientConnection connection = new ClientConnection("PI", "crabcakes2018", "localhost", 6372);
+        ClientConnection connection = new ClientConnection("PI", "crabcakes2018", "104.154.244.147", 6372);
         connection.waitUntilConnected();
         connection.waitForOther();
 
