@@ -7,6 +7,12 @@
 #ignore config piles
 *.ini
 
+#ignore intellij files
+*.iml
+
+#ignore build files
+target/
+
 #ignore virtual enviornment folder
 venv/
 
