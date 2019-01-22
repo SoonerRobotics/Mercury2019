@@ -1,7 +1,8 @@
+package ouscr.mercury;
+
 import com.fazecast.jSerialComm.SerialPort;
-import com.github.strikerx3.jxinput.XInputDevice;
-import networking.ClientConnection;
-import networking.Frame;
+import ouscr.mercury.networking.ClientConnection;
+import ouscr.mercury.networking.Frame;
 
 import java.io.IOException;
 import java.io.Serializable;

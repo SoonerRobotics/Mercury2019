@@ -1,13 +1,12 @@
+package ouscr.mercury;
+
 import com.github.strikerx3.jxinput.XInputAxes;
 import com.github.strikerx3.jxinput.XInputDevice;
 import com.github.strikerx3.jxinput.exceptions.XInputNotLoadedException;
-import networking.ClientConnection;
-import networking.Frame;
-import networking.VideoClientThread;
-import ui.MercuryUI;
 import com.github.sarxos.webcam.Webcam;
+import ouscr.mercury.networking.Frame;
+import ouscr.mercury.networking.ClientConnection;
 
-import java.awt.*;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;

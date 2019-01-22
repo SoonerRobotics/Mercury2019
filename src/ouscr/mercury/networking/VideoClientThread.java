@@ -1,4 +1,4 @@
-package networking;
+package ouscr.mercury.networking;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;

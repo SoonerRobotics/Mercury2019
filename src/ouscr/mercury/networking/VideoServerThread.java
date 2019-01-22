@@ -1,4 +1,4 @@
-package networking;
+package ouscr.mercury.networking;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -35,7 +35,7 @@ public class VideoServerThread extends Thread
             ObjectInputStream ois = new ObjectInputStream(in);
             while (calling)
             {
-                networking.Frame f = (networking.Frame) ois.readObject();
+                Frame f = (Frame) ois.readObject();
                 InputStream inputImage = new ByteArrayInputStream(f.bytes);
                 BufferedImage bufferedImage = ImageIO.read(inputImage);
                 panel.getGraphics().drawImage(bufferedImage, 0, 0, 800, 450, null);

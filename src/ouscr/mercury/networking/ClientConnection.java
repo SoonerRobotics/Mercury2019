@@ -1,4 +1,4 @@
-package networking;
+package ouscr.mercury.networking;
 
 import com.sun.security.ntlm.Client;
 

@@ -1,4 +1,4 @@
-package networking;
+package ouscr.mercury.networking;
 
 import java.io.*;
 import java.net.DatagramPacket;

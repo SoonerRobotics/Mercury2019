@@ -1,6 +1,6 @@
-package ui;
+package ouscr.mercury.ui;
 
-import networking.VideoServerThread;
+import ouscr.mercury.networking.VideoServerThread;
 
 import javax.swing.*;
 import java.awt.*;

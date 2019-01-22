@@ -1,5 +1,6 @@
-import networking.ClientConnection;
-import networking.Frame;
+package ouscr.mercury;
+
+import ouscr.mercury.networking.Frame;
 
 import java.io.*;
 import java.net.*;
