@@ -15,14 +15,13 @@ def _send_chunk(c, msg):
 def _get_chunk(c, length: int):
     if length <= 0:
         return ''
+    print("going to find " + str(length) + " bytes")
     buf = bytearray()
     while len(buf) < length:
         buf2 = c.recv(length - len(buf))
         if not buf2:
             if buf:
                 raise RuntimeError("Connection to server lost.")
-            else:
-                return ''
         buf += buf2
     return buf
 
