@@ -46,6 +46,8 @@ public class ClientDriver {
         // Retrieve the device for player 1
         XInputDevice device = XInputDevice.getDeviceFor(0); // or devices[0]
 
+        //104.154.244.147
+
         ClientConnection connection = new ClientConnection("PC", "crabcakes2018", "localhost", 6372);
         connection.waitUntilConnected();
         connection.waitForOther();

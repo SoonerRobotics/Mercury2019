@@ -17,6 +17,7 @@ public class RaspberryPiDriver {
 
     public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
 
+
         boolean running = true;
 
         SerialPort[] comPorts = SerialPort.getCommPorts();
@@ -48,7 +49,8 @@ public class RaspberryPiDriver {
     private static SerialPort getArduinoPort(SerialPort[] comPorts) {
         if (comPorts.length > 0) {
             for (SerialPort com : comPorts) {
-                if (com.getDescriptivePortName().contains("Arduino")){
+                System.out.println("Found " + com.getDescriptivePortName());
+                if (com.getDescriptivePortName().contains("USB")){
                     return com;
                 }
             }
