@@ -6,6 +6,7 @@ import ouscr.mercury.networking.Frame;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,6 +15,10 @@ public class RaspberryPiDriver {
 
     private static final Logger LOGGER = Logger.getLogger( RaspberryPiDriver.class.getName() );
 
+    public static byte [] float2ByteArray (float value)
+    {
+        return ByteBuffer.allocate(4).putFloat(value).array();
+    }
 
     public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
 
@@ -42,7 +47,18 @@ public class RaspberryPiDriver {
             if (in.type == Frame.FrameType.ROBOT) {
                 //LOGGER.log(Level.FINE, "Robot Instructions: " + Arrays.toString(in.bytes));
                 System.out.println("[" + in.bytes.length + "] " + in.bytes[0] + ", " + in.bytes[1]);
-                comPort.writeBytes(in.bytes, in.bytes.length);
+                Frame.RobotInstruction ri = (Frame.RobotInstruction) in.deserialize();
+
+                byte[] lefthalf = float2ByteArray(ri.leftMotor);
+                byte[] righthalf = float2ByteArray(ri.rightMotor);
+                byte[] both = new byte[lefthalf.length + righthalf.length];
+
+                for (int i=0; i<lefthalf.length; i++ ){
+                    both[i] = lefthalf[i];
+                    both[i+4] = righthalf[i];
+                }
+
+                comPort.writeBytes(both, both.length);
             }
         }
         comPort.closePort();
