@@ -46,7 +46,6 @@ public class RaspberryPiDriver {
             Frame in = connection.receiveFrame();
             if (in.type == Frame.FrameType.ROBOT) {
                 //LOGGER.log(Level.FINE, "Robot Instructions: " + Arrays.toString(in.bytes));
-                System.out.println("[" + in.bytes.length + "] " + in.bytes[0] + ", " + in.bytes[1]);
                 Frame.RobotInstruction ri = (Frame.RobotInstruction) in.deserialize();
 
                 byte[] lefthalf = float2ByteArray(ri.leftMotor);
@@ -57,6 +56,8 @@ public class RaspberryPiDriver {
                     both[i] = lefthalf[i];
                     both[i+4] = righthalf[i];
                 }
+
+                System.out.println(ri.leftMotor + ", " + ri.rightMotor + " [" + both.length + "]");
 
                 comPort.writeBytes(both, both.length);
             }
