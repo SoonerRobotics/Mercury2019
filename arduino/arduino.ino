@@ -30,6 +30,9 @@ void loop() {
       Instruction instruction = packet.data;
       motorA.output(instruction.leftMotor);
       motorB.output(instruction.rightMotor);
+      String debug = String(instruction.leftMotor) + ", " + String(instruction.rightMotor) + "\n";
+      Serial.write(debug.length());
+      Serial.print(debug);
     }
   }
 }

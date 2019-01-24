@@ -60,6 +60,15 @@ public class RaspberryPiDriver {
                 System.out.println(ri.leftMotor + ", " + ri.rightMotor + " [" + both.length + "]");
 
                 comPort.writeBytes(both, both.length);
+
+
+                byte[] size = new byte[1];
+                comPort.readBytes(size, 1);
+
+                byte[] debug = new byte[(int)size[0]];
+                comPort.readBytes(debug, debug.length);
+
+                System.out.println(Arrays.toString(debug));
             }
         }
         comPort.closePort();
