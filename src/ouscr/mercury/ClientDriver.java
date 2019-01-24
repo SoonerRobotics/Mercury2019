@@ -15,6 +15,8 @@ public class ClientDriver {
 
     private static final Logger LOGGER = Logger.getLogger( ClientDriver.class.getName() );
 
+    private static final float DEADZONE = 0.15f;
+
     public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException, XInputNotLoadedException {
 
         /*
@@ -56,8 +58,8 @@ public class ClientDriver {
 
         while (device.poll()) {
             XInputAxes axes = device.getComponents().getAxes();
-            instructions.leftMotor = axes.ly;
-            instructions.rightMotor = axes.ry;
+            instructions.leftMotor = Math.abs(axes.ly) > DEADZONE ? axes.ly/1.2f : 0;
+            instructions.rightMotor = Math.abs(axes.ry) > DEADZONE ? axes.ry/1.2f : 0;
             connection.sendFrame(new Frame(instructions, Frame.FrameType.ROBOT));
             Thread.sleep(10); //TODO: is this needed?
         }
