@@ -58,8 +58,8 @@ public class ClientDriver {
 
         while (device.poll()) {
             XInputAxes axes = device.getComponents().getAxes();
-            instructions.leftMotor = Math.abs(axes.ly) > DEADZONE ? axes.ly/1.2f : 0;
-            instructions.rightMotor = Math.abs(axes.ry) > DEADZONE ? axes.ry/1.2f : 0;
+            instructions.leftMotor = (int)(Math.abs(axes.ly) > DEADZONE ? axes.ly/1.2f*255 : 0);
+            instructions.rightMotor = (int)(Math.abs(axes.ry) > DEADZONE ? axes.ry/1.2f*255 : 0);
             connection.sendFrame(new Frame(instructions, Frame.FrameType.ROBOT));
             Thread.sleep(10); //TODO: is this needed?
         }

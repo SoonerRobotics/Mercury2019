@@ -21,8 +21,8 @@ public class Frame implements Serializable
     }
 
     public static class RobotInstruction implements Serializable {
-        public float leftMotor;
-        public float rightMotor;
+        public int leftMotor;
+        public int rightMotor;
     }
 
     public FrameType type = FrameType.UNKNOWN;

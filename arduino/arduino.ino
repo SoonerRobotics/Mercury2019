@@ -1,4 +1,5 @@
 #include "Motor.h" //from RobotLib
+#include <ArduinoJson.h>
 
 Motor motorA;
 Motor motorB;
@@ -13,6 +14,8 @@ union InstructionPacket  {
   byte buffr[sizeof(Instruction)];
 };
 
+StaticJsonBuffer<256> jsonBuffer;
+
 void setup() {
   Serial.begin(9600);
   
@@ -21,18 +24,23 @@ void setup() {
 }
 
 void loop() {
-  // send data only when you receive data:
+  //wait for data
   if (Serial.available() > 0) {
-  
-    InstructionPacket packet;
-    
-    if (Serial.readBytes(packet.buffr, sizeof(packet.buffr)) == sizeof(packet.buffr)) { //read all the bytes that make up an instruction packet into the packet buffer
-      Instruction instruction = packet.data;
-      motorA.output(instruction.leftMotor);
-      motorB.output(instruction.rightMotor);
-      String debug = String(instruction.leftMotor) + ", " + String(instruction.rightMotor) + "\n";
-      Serial.write(debug.length());
-      Serial.print(debug);
+    JsonObject& obj = jsonBuffer.parse(Serial);
+    if (obj.success()) {
+      String event = obj["event"];
+      
+      if (event.equals("move")) {
+        JsonArray& data = obj["data"];
+
+        int left = data[0];
+        int right = data[1];
+        
+        motorA.output(left/255.0f);
+        motorA.output(right/255.0f);
+
+        Serial.write(0);
+      }
     }
   }
 }
