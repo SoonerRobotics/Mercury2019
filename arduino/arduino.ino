@@ -14,8 +14,6 @@ union InstructionPacket  {
   byte buffr[sizeof(Instruction)];
 };
 
-StaticJsonBuffer<256> jsonBuffer;
-
 void setup() {
   Serial.begin(9600);
   
@@ -26,7 +24,11 @@ void setup() {
 void loop() {
   //wait for data
   if (Serial.available() > 0) {
-    JsonObject& obj = jsonBuffer.parse(Serial);
+    String comms = Serial.readStringUntil('\n');
+    
+    StaticJsonBuffer<256> jsonBuffer;
+    JsonObject& obj = jsonBuffer.parse(comms);
+    
     if (obj.success()) {
       String event = obj["event"];
       
@@ -37,10 +39,10 @@ void loop() {
         int right = data[1];
         
         motorA.output(left/255.0f);
-        motorA.output(right/255.0f);
-
-        Serial.write(0);
+        motorB.output(right/255.0f);
       }
     }
+    
+    Serial.write(1);
   }
 }

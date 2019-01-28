@@ -23,7 +23,7 @@ public class Arduino {
         }
 
         public String getJson() {
-            return gson.toJson(this);
+            return gson.toJson(this) + '\n';
         }
     }
 
@@ -59,6 +59,8 @@ public class Arduino {
         //read anything to confirm done
         byte[] buf = new byte[1];
         comPort.readBytes(buf, 1);
+
+        System.out.println("read " + buf[0]);
     }
 
     private static SerialPort getArduinoPort(SerialPort[] comPorts) {
