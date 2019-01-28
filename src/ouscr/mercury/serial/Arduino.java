@@ -43,8 +43,10 @@ public class Arduino {
     }
 
     public void open() {
+
+        comPort.setBaudRate(9600);
         comPort.openPort();
-        comPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 100, 0);
+        comPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING | SerialPort.TIMEOUT_WRITE_BLOCKING, 1000, 1000);
     }
 
     public void close() {
@@ -54,6 +56,18 @@ public class Arduino {
     public void write(ArduinoEvent event) {
         //write json data to arduino
         byte[] jsonbytes = event.getJson().getBytes();
+        comPort.writeBytes(jsonbytes, jsonbytes.length);
+
+        //read anything to confirm done
+        byte[] buf = new byte[1];
+        comPort.readBytes(buf, 1);
+
+        System.out.println("read " + (int)buf[0]);
+    }
+
+    public void writeRaw(String data) {
+        //write json data to arduino
+        byte[] jsonbytes = data.getBytes();
         comPort.writeBytes(jsonbytes, jsonbytes.length);
 
         //read anything to confirm done

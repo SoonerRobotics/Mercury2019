@@ -1,14 +1,10 @@
 package ouscr.mercury;
 
-import com.fazecast.jSerialComm.SerialPort;
 import ouscr.mercury.networking.ClientConnection;
 import ouscr.mercury.networking.Frame;
 import ouscr.mercury.serial.Arduino;
 
 import java.io.IOException;
-import java.io.Serializable;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,6 +18,7 @@ public class RaspberryPiDriver {
         boolean running = true;
 
         Arduino arduino = new Arduino();
+        arduino.open();
 
         ClientConnection connection = new ClientConnection("PI", "crabcakes2018", "104.154.244.147", 6372);
         connection.waitUntilConnected();
@@ -43,5 +40,6 @@ public class RaspberryPiDriver {
         }
 
         arduino.close();
+
     }
 }
