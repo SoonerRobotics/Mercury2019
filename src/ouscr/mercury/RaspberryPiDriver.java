@@ -1,9 +1,12 @@
 package ouscr.mercury;
 
+import com.github.sarxos.webcam.Webcam;
 import ouscr.mercury.networking.ClientConnection;
 import ouscr.mercury.networking.Frame;
+import ouscr.mercury.networking.VideoClientThread;
 import ouscr.mercury.serial.Arduino;
 
+import java.awt.*;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,6 +17,18 @@ public class RaspberryPiDriver {
 
     public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
         LOGGER.setLevel(Level.ALL);
+
+        Dimension[] nonStandardResolutions = new Dimension[] {
+                new Dimension(800, 450),
+        };
+
+        Webcam cam = Webcam.getDefault();
+        cam.setCustomViewSizes(nonStandardResolutions);
+        cam.setViewSize(nonStandardResolutions[0]);
+        cam.open();
+
+        VideoClientThread thread = new VideoClientThread(cam, "localhost", 6372, true);
+        thread.start();
 
         boolean running = true;
 
