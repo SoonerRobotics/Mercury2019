@@ -12,7 +12,12 @@ public class Frame implements Serializable
         UNKNOWN,
         STRING,
         RESPONSE,
-        ROBOT
+        ROBOT,
+        KEEPALIVE
+    }
+
+    public static class KeepAlive implements Serializable {
+        public long time;
     }
 
     public static class Handshake implements Serializable {

@@ -1,9 +1,13 @@
 package ouscr.mercury.networking;
 
-import com.sun.security.ntlm.Client;
-
 import java.io.IOException;
-import java.net.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketTimeoutException;
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -12,6 +16,32 @@ public class ClientConnection {
     public class NotConnectedException extends RuntimeException {
         public NotConnectedException() {
             super("Not connected to server.");
+        }
+    }
+
+    class KeepAliveScheduler extends TimerTask {
+
+        ClientConnection conn;
+
+        KeepAliveScheduler(ClientConnection connection) {
+            conn = connection;
+        }
+
+        @Override
+        public void run() {
+            Frame.KeepAlive packet = new Frame.KeepAlive();
+            packet.time = new Date().getTime();
+            Frame frame = null;
+            try {
+                frame = new Frame(packet, Frame.FrameType.KEEPALIVE);
+            } catch (IOException e) {
+                LOGGER.log(Level.SEVERE, "Could not create keep alive packet!");
+            }
+            try {
+                conn.sendFrame(frame);
+            } catch (IOException e) {
+                LOGGER.log(Level.SEVERE, "Could not send keep alive packet!");
+            }
         }
     }
 
@@ -25,6 +55,8 @@ public class ClientConnection {
 
     private boolean connected = false;
     private boolean otherConnected = false;
+
+    private KeepAliveScheduler keepAliveScheduler;
 
     public ClientConnection(String clientID, String password, String host, int port) throws IOException {
         //set instance data
@@ -52,10 +84,18 @@ public class ClientConnection {
         if (!connected) {
             throw new NotConnectedException();
         }
-        byte[] buffer = new byte[2048];
-        DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-        socket.receive(packet);
-        return new Frame(packet.getData());
+
+        //Wait until we get a non keep-alive packet
+        while(true) {
+            byte[] buffer = new byte[2048];
+            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+            socket.receive(packet);
+
+            Frame frame = new Frame(packet.getData());
+            if (frame.type != Frame.FrameType.KEEPALIVE) {
+                return frame;
+            }
+        }
     }
 
     public void waitForOther() throws IOException, ClassNotFoundException {
@@ -115,6 +155,11 @@ public class ClientConnection {
         while (!connected) {
             connect();
         }
+
+        //After we connect, keep alive
+        keepAliveScheduler = new KeepAliveScheduler(this);
+        Timer timer = new Timer();
+        timer.schedule(keepAliveScheduler, 1000, 10000); //Keep alive every 10 seconds
     }
 
     public boolean isOtherConnected() {

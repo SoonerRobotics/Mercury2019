@@ -2,8 +2,10 @@ package ouscr.mercury;
 
 import ouscr.mercury.networking.Frame;
 
-import java.io.*;
-import java.net.*;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

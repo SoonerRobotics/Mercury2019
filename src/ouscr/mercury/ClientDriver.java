@@ -3,10 +3,8 @@ package ouscr.mercury;
 import com.github.strikerx3.jxinput.XInputAxes;
 import com.github.strikerx3.jxinput.XInputDevice;
 import com.github.strikerx3.jxinput.exceptions.XInputNotLoadedException;
-import com.github.sarxos.webcam.Webcam;
-import ouscr.mercury.networking.Frame;
 import ouscr.mercury.networking.ClientConnection;
-import ouscr.mercury.ui.MercuryUI;
+import ouscr.mercury.networking.Frame;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -25,12 +23,6 @@ public class ClientDriver {
     private static final float MAX_SPEED_RIGHT = 1.0f; //max speed on a 0-1 scale.
 
     public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException, XInputNotLoadedException {
-
-
-        MercuryUI gui = new MercuryUI();
-
-        gui.start();
-
 
         // Retrieve all devices
         XInputDevice[] devices = XInputDevice.getAllDevices();
