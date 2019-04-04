@@ -8,7 +8,7 @@ enum Event {
   Arm = 3,
   Scoop = 4,
   Lights = 5
-}
+};
 
 //Motors, Servos, and Lights
 Motor motorA;
