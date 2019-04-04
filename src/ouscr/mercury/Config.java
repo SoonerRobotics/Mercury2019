@@ -44,7 +44,5 @@ public class Config {
         ip = prop.getProperty("server.ip");
         port = Integer.parseInt(prop.getProperty("server.port"));
         password = prop.getProperty("password");
-
-        System.out.println("ip is " + ip);
     }
 }
