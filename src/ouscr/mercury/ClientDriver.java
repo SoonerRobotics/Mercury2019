@@ -21,11 +21,13 @@ public class ClientDriver {
 
     private static final float MIN_SPEED_LEFT = 0.5f; //the speed we reach right after pushing past the deadzone
     private static final float MAX_SPEED_LEFT = 1.0f; //max speed on a 0-1 scale.
-    private static final boolean REVERSE_LEFT = false; //reverse the direction of the left motor
+    private static final boolean REVERSE_LEFT = true; //reverse the direction of the left motor
 
     private static final float MIN_SPEED_RIGHT = 0.5f; //the speed we reach right after pushing past the deadzone
     private static final float MAX_SPEED_RIGHT = 1.0f; //max speed on a 0-1 scale.
     private static final boolean REVERSE_RIGHT = false; //reverse the direction of the right motor
+
+    private static final boolean SWAP_STICKS = true;
 
 
     public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException, XInputNotLoadedException {
@@ -69,6 +71,12 @@ public class ClientDriver {
 
             if (REVERSE_RIGHT) {
                 data[1] *= -1;
+            }
+
+            if (SWAP_STICKS) {
+                int temp = data[0];
+                data[0] = data[1];
+                data[1] = temp;
             }
 
             Arduino.ArduinoEvent event = new Arduino.ArduinoEvent(Arduino.EventType.Motors, data);

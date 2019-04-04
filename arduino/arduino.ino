@@ -57,12 +57,7 @@ void loop() {
 void MotorInstruction(JsonArray& data) {
   int left = data[0]; //-255 to 255
   int right = data[1]; //-255 to 255
-
-  Serial.print("left: ");
-  Serial.println(left);
-  Serial.print("right: ");
-  Serial.println(right);
-
+  
   motorA.output(left/255.0f);
   motorB.output(right/255.0f);
 }
