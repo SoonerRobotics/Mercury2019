@@ -4,6 +4,7 @@ import com.fazecast.jSerialComm.SerialPort;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,7 +24,7 @@ public class Arduino {
         }
     }
 
-    public static class ArduinoEvent {
+    public static class ArduinoEvent implements Serializable {
 
         private static GsonBuilder builder = new GsonBuilder();
         private static Gson gson = builder.create();

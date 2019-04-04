@@ -18,3 +18,5 @@ venv/
 
 #ignore VS Code workspace files
 *.code-workspace
+
+mercury.config
