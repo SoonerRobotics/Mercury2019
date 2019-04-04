@@ -29,8 +29,8 @@ public class Arduino {
         private static GsonBuilder builder = new GsonBuilder();
         private static Gson gson = builder.create();
 
-        int id;
-        int[] data;
+        public int id;
+        public int[] data;
 
         public ArduinoEvent(EventType eventType, int[] data) {
             this.id = eventType.id;
