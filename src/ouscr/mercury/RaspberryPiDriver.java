@@ -35,7 +35,7 @@ public class RaspberryPiDriver {
                 //uncomment until arduino doesnt exist
                 //arduino.write(event);
 
-                LOGGER.log(Level.FINE, "Robot Instructions: " + event.data[0] + ", " + event.data[1]);
+                System.out.println("Robot Instructions: " + event.data[0] + ", " + event.data[1]);
             }
         }
 
