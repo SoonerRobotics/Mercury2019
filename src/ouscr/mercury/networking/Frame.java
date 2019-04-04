@@ -25,11 +25,6 @@ public class Frame implements Serializable
         public String password;
     }
 
-    public static class RobotInstruction implements Serializable {
-        public int leftMotor;
-        public int rightMotor;
-    }
-
     public FrameType type = FrameType.UNKNOWN;
     public byte[] bytes;
 

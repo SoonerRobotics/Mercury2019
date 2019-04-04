@@ -13,8 +13,8 @@ public class ServerDriver {
 
     private static final Logger LOGGER = Logger.getLogger( ServerDriver.class.getName() );
 
-    private final static int port = 6372;
-    private final static String password = "crabcakes2018";
+    private static int port;
+    private static String password;
 
     private static InetAddress PC;
     private static int PC_port = -1;
@@ -25,6 +25,9 @@ public class ServerDriver {
     private static boolean running = true;
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {
+
+        port = Config.port;
+        password = Config.password;
 
         socket = new DatagramSocket(port);
 

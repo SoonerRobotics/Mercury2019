@@ -6,6 +6,9 @@ import java.io.IOException;
 
 public class Driver {
     public static void main(String[] args) throws InterruptedException, IOException, ClassNotFoundException, XInputNotLoadedException {
+
+        Config.readConfig();
+
         if (args.length == 0) {
             System.exit(0);
         }

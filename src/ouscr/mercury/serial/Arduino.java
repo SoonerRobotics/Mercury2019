@@ -9,16 +9,35 @@ import java.util.logging.Logger;
 
 public class Arduino {
 
+    public enum EventType {
+        Ping (0),
+        Motors (1),
+        Launcher (2),
+        Arm (3),
+        Scoop (4),
+        Lights (5);
+
+        int id;
+        EventType(int id) {
+            this.id = id;
+        }
+    }
+
     public static class ArduinoEvent {
 
         private static GsonBuilder builder = new GsonBuilder();
         private static Gson gson = builder.create();
 
-        String event;
+        int id;
         int[] data;
 
-        public ArduinoEvent(String event, int[] data) {
-            this.event = event;
+        public ArduinoEvent(EventType eventType, int[] data) {
+            this.id = eventType.id;
+            this.data = data;
+        }
+
+        public ArduinoEvent(int id, int[] data) {
+            this.id = id;
             this.data = data;
         }
 
@@ -44,7 +63,7 @@ public class Arduino {
 
     public void open() {
 
-        comPort.setBaudRate(9600);
+        comPort.setBaudRate(115200);
         comPort.openPort();
         comPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING | SerialPort.TIMEOUT_WRITE_BLOCKING, 1000, 1000);
     }
@@ -61,8 +80,6 @@ public class Arduino {
         //read anything to confirm done
         byte[] buf = new byte[1];
         comPort.readBytes(buf, 1);
-
-        System.out.println("read " + (int)buf[0]);
     }
 
     public void writeRaw(String data) {
@@ -73,8 +90,6 @@ public class Arduino {
         //read anything to confirm done
         byte[] buf = new byte[1];
         comPort.readBytes(buf, 1);
-
-        System.out.println("read " + buf[0]);
     }
 
     private static SerialPort getArduinoPort(SerialPort[] comPorts) {

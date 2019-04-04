@@ -5,6 +5,7 @@ import com.github.strikerx3.jxinput.XInputDevice;
 import com.github.strikerx3.jxinput.exceptions.XInputNotLoadedException;
 import ouscr.mercury.networking.ClientConnection;
 import ouscr.mercury.networking.Frame;
+import ouscr.mercury.serial.Arduino;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -14,13 +15,18 @@ public class ClientDriver {
 
     private static final Logger LOGGER = Logger.getLogger( ClientDriver.class.getName() );
 
-    private static final int TICKRATE = 20; //frequency (Hz) at which controller is polled
+    private static final int TICKRATE = 10; //frequency (Hz) at which controller is polled
+
     private static final float DEADZONE = 0.15f; //deadzone percentages
+
     private static final float MIN_SPEED_LEFT = 0.5f; //the speed we reach right after pushing past the deadzone
     private static final float MAX_SPEED_LEFT = 1.0f; //max speed on a 0-1 scale.
+    private static final boolean REVERSE_LEFT = false; //reverse the direction of the left motor
 
     private static final float MIN_SPEED_RIGHT = 0.5f; //the speed we reach right after pushing past the deadzone
     private static final float MAX_SPEED_RIGHT = 1.0f; //max speed on a 0-1 scale.
+    private static final boolean REVERSE_RIGHT = false; //reverse the direction of the right motor
+
 
     public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException, XInputNotLoadedException {
 
@@ -36,35 +42,47 @@ public class ClientDriver {
         // Retrieve the device for player 1
         XInputDevice device = XInputDevice.getDeviceFor(0); // or devices[0]
 
-        //104.154.244.147
-
-        ClientConnection connection = new ClientConnection("PC", "crabcakes2018", "3.19.27.173", 6372);
+        ClientConnection connection = new ClientConnection("PC", Config.password, Config.ip, Config.port);
         connection.waitUntilConnected();
         connection.waitForOther();
-
-        Frame.RobotInstruction instructions = new Frame.RobotInstruction();
-
-        int lastLeft = 0;
-        int lastRight = 0;
 
         while (device.poll()) {
             XInputAxes axes = device.getComponents().getAxes();
 
-            instructions.leftMotor = (int)(Math.abs(axes.ly) > DEADZONE ?
+            int[] data = new int[2];
+
+            //Left Motor
+            data[0] = (int)(Math.abs(axes.ly) > DEADZONE ?
                     (axes.ly) / (Math.abs(axes.ly)) * scale(Math.abs(axes.ly), DEADZONE, 1f, MIN_SPEED_LEFT, MAX_SPEED_LEFT) * 255
                     : 0
             );
-            instructions.rightMotor = (int)(Math.abs(axes.ry) > DEADZONE ?
+
+            if (REVERSE_LEFT) {
+                data[0] *= -1;
+            }
+
+            //Right Motor
+            data[1] = (int)(Math.abs(axes.ry) > DEADZONE ?
                     (axes.ry) / (Math.abs(axes.ry)) * scale(Math.abs(axes.ry), DEADZONE, 1f, MIN_SPEED_RIGHT, MAX_SPEED_RIGHT) * 255
                     : 0
             );
 
+            if (REVERSE_RIGHT) {
+                data[1] *= -1;
+            }
+
+            Arduino.ArduinoEvent event = new Arduino.ArduinoEvent(Arduino.EventType.Motors, data);
+
+            /*
             //only send when there is no new information
             if (instructions.leftMotor != lastLeft || instructions.rightMotor != lastRight) {
                 connection.sendFrame(new Frame(instructions, Frame.FrameType.ROBOT));
                 lastLeft = instructions.leftMotor;
                 lastRight = instructions.rightMotor;
             }
+            */
+
+            connection.sendFrame(new Frame(event, Frame.FrameType.ROBOT));
 
             Thread.sleep(1000 / TICKRATE);
         }

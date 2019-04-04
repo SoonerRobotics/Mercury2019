@@ -20,7 +20,7 @@ public class RaspberryPiDriver {
         Arduino arduino = new Arduino();
         arduino.open();
 
-        ClientConnection connection = new ClientConnection("PI", "crabcakes2018", "3.19.27.173", 6372);
+        ClientConnection connection = new ClientConnection("PI", Config.password, Config.ip, Config.port);
         connection.waitUntilConnected();
         connection.waitForOther();
 
@@ -28,13 +28,9 @@ public class RaspberryPiDriver {
             Frame in = connection.receiveFrame();
             if (in.type == Frame.FrameType.ROBOT) {
                 //LOGGER.log(Level.FINE, "Robot Instructions: " + Arrays.toString(in.bytes));
-                Frame.RobotInstruction ri = (Frame.RobotInstruction) in.deserialize();
 
-                System.out.println(ri.leftMotor + ", " + ri.rightMotor);
-
-                int[] data = {ri.leftMotor, ri.rightMotor};
-
-                Arduino.ArduinoEvent event = new Arduino.ArduinoEvent("move", data);
+                //Literally just write any ArduinoEvent to the Arduino
+                Arduino.ArduinoEvent event = (Arduino.ArduinoEvent) in.deserialize();
                 arduino.write(event);
             }
         }
