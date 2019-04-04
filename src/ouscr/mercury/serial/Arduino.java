@@ -89,8 +89,8 @@ public class Arduino {
         comPort.writeBytes(jsonbytes, jsonbytes.length);
 
         //read anything to confirm done
-        byte[] buf = new byte[1];
-        comPort.readBytes(buf, 1);
+        //byte[] buf = new byte[1];
+        //comPort.readBytes(buf, 1);
     }
 
     private static SerialPort getArduinoPort(SerialPort[] comPorts) {

@@ -33,7 +33,7 @@ public class RaspberryPiDriver {
                 Arduino.ArduinoEvent event = (Arduino.ArduinoEvent) in.deserialize();
 
                 //uncomment until arduino doesnt exist
-                //arduino.write(event);
+                arduino.write(event);
 
                 System.out.println("Robot Instructions: " + event.data[0] + ", " + event.data[1]);
             }
