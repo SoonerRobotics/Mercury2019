@@ -29,18 +29,12 @@ public class Arduino {
         private static GsonBuilder builder = new GsonBuilder();
         private static Gson gson = builder.create();
 
-        public int id;
-        public int[] data;
-
-        public ArduinoEvent(EventType eventType, int[] data) {
-            this.id = eventType.id;
-            this.data = data;
-        }
-
-        public ArduinoEvent(int id, int[] data) {
-            this.id = id;
-            this.data = data;
-        }
+        public int motor1;
+        public int motor2;
+        public int launcher;
+        public int arm;
+        public int scoop;
+        public int[] lights;
 
         public String getJson() {
             return gson.toJson(this) + '\n';

@@ -15,19 +15,19 @@ public class ClientDriver {
 
     private static final Logger LOGGER = Logger.getLogger( ClientDriver.class.getName() );
 
-    private static final int TICKRATE = 10; //frequency (Hz) at which controller is polled
+    private static final int TICKRATE = 12; //frequency (Hz) at which controller is polled
 
     private static final float DEADZONE = 0.15f; //deadzone percentages
 
-    private static final float MIN_SPEED_LEFT = 0.5f; //the speed we reach right after pushing past the deadzone
-    private static final float MAX_SPEED_LEFT = 1.0f; //max speed on a 0-1 scale.
-    private static final boolean REVERSE_LEFT = true; //reverse the direction of the left motor
+    private static final float MIN_SPEED_LEFT = 0.4f; //the speed we reach right after pushing past the deadzone
+    private static final float MAX_SPEED_LEFT = 0.8f; //max speed on a 0-1 scale.
+    private static final boolean REVERSE_LEFT = false; //reverse the direction of the left motor
 
-    private static final float MIN_SPEED_RIGHT = 0.5f; //the speed we reach right after pushing past the deadzone
-    private static final float MAX_SPEED_RIGHT = 1.0f; //max speed on a 0-1 scale.
-    private static final boolean REVERSE_RIGHT = false; //reverse the direction of the right motor
+    private static final float MIN_SPEED_RIGHT = 0.4f; //the speed we reach right after pushing past the deadzone
+    private static final float MAX_SPEED_RIGHT = 0.8f; //max speed on a 0-1 scale.
+    private static final boolean REVERSE_RIGHT = true; //reverse the direction of the right motor
 
-    private static final boolean SWAP_STICKS = true;
+    private static final boolean SWAP_STICKS = false;
 
 
     public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException, XInputNotLoadedException {
@@ -79,7 +79,24 @@ public class ClientDriver {
                 data[1] = temp;
             }
 
-            Arduino.ArduinoEvent event = new Arduino.ArduinoEvent(Arduino.EventType.Motors, data);
+            Arduino.ArduinoEvent event = new Arduino.ArduinoEvent();
+            event.motor1 = data[0];
+            event.motor2 = data[1];
+            event.launcher = axes.rt > 0.8 ? 1 : 0;
+            if (device.getComponents().getButtons().left) {
+                event.arm = -1;
+            } else if (device.getComponents().getButtons().right) {
+                event.arm = 1;
+            } else {
+                event.arm = 0;
+            }
+            if (device.getComponents().getButtons().up) {
+                event.scoop = 1;
+            } else if (device.getComponents().getButtons().down) {
+                event.scoop = -1;
+            } else {
+                event.scoop = 0;
+            }
 
             /*
             //only send when there is no new information
