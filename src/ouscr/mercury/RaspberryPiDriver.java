@@ -38,7 +38,7 @@ public class RaspberryPiDriver {
                 if (lastEvent == null) {
                     lastEvent = event;
                 }else if (event.id == lastEvent.id && Arrays.equals(event.data, lastEvent.data)) {
-                    return;
+                    break;
                 }
 
                 //uncomment until arduino doesnt exist
