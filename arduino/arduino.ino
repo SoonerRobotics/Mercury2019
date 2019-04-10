@@ -18,7 +18,7 @@ void setup() {
   
   //Initalize Servos
   launchPin.attach(9);
-  launchPin.write(152); //set to armed position
+  launchPin.write(140); //set to armed position
 
   //Initalize Lights
 
@@ -58,12 +58,12 @@ void LauncherInstruction(int launcher) {
   //There is no data, we just care about when the packet is sent. Data can be used to control
   //servo angles from client though, if needed.
   if (inArmState && launcher == 1 && millis() - timeClosed > 500) {
-    launchPin.write(90);
+    launchPin.write(70);
     timeLaunched = millis();
     inArmState = false;
   }
   if (!inArmState && launcher == 0 && millis() - timeLaunched > 500) {
-    launchPin.write(152);
+    launchPin.write(140);
     timeClosed = millis();
     inArmState = true;
   }
