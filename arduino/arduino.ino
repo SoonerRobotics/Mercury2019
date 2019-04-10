@@ -1,4 +1,5 @@
 #include "Motor.h" //from RobotLib
+#include <Servo.h>
 #include <ArduinoJson.h>
 
 enum Event {
@@ -14,6 +15,8 @@ enum Event {
 Motor motorA;
 Motor motorB;
 
+Servo launchPin;
+
 void setup() {
   //Initalize Serial
   Serial.begin(115200);
@@ -23,6 +26,8 @@ void setup() {
   motorB.begin(7,8,6);
   
   //Initalize Servos
+  launchPin.attach(9);
+  launchPin.write(153); //set to armed position
 
   //Initalize Lights
 
@@ -55,6 +60,7 @@ void loop() {
 }
 
 void MotorInstruction(JsonArray& data) {
+  //data is between -255 to 255 int for speed, convert to -1 to 1 double
   int left = data[0]; //-255 to 255
   int right = data[1]; //-255 to 255
   
@@ -63,11 +69,17 @@ void MotorInstruction(JsonArray& data) {
 }
 
 void LauncherInstruction(JsonArray& data) {
-    
+  //There is no data, we just care about when the packet is sent. Data can be used to control
+  //servo angles from client though, if needed.
+  if (data[0] == 1) {
+    launchPin.write(90);
+    delay(500);
+    launchPin.write(153);
+  }
 }
 
 void ArmInstruction(JsonArray& data) {
-    
+
 }
 
 void ScoopInstruction(JsonArray& data) {
