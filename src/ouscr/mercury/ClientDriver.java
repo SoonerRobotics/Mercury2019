@@ -82,7 +82,7 @@ public class ClientDriver {
             Arduino.ArduinoEvent event = new Arduino.ArduinoEvent();
             event.motor1 = data[0];
             event.motor2 = data[1];
-            event.launcher = axes.rt > 0.8 ? 1 : 0;
+            event.launcher = axes.rt > 0.8 ? 80 : 140;
             if (device.getComponents().getButtons().left) {
                 event.arm = -1;
             } else if (device.getComponents().getButtons().right) {
@@ -106,6 +106,12 @@ public class ClientDriver {
                 lastRight = instructions.rightMotor;
             }
             */
+
+
+            event.lights = new int[32];
+            for (int i=0; i<32; i++) {
+                event.lights[i] = (axes.lt*32) > i ? 1 : 0;
+            }
 
             connection.sendFrame(new Frame(event, Frame.FrameType.ROBOT));
 

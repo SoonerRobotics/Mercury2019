@@ -65,7 +65,7 @@ void loop() {
   if (Serial.available() > 0) {
     String comms = Serial.readStringUntil('\n');
     
-    StaticJsonBuffer<256> jsonBuffer;
+    StaticJsonBuffer<512> jsonBuffer;
     JsonObject& obj = jsonBuffer.parse(comms);
     
     if (obj.success()) {
@@ -100,7 +100,8 @@ void ScoopInstruction(int data) {
 
 void LightsInstruction(JsonArray& data) {
     for (int i=0; i<data.size(); i++) {
-      leds[i] = colorScheme[(int)data[i]];
+      int datai = data[i];
+      leds[i] = colorScheme[datai];
     }
     FastLED.show();
 }
