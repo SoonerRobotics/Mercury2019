@@ -1,27 +1,63 @@
 #include "Motor.h" //from RobotLib
 #include <Servo.h>
 #include <ArduinoJson.h>
+#include <FastLED.h>
 
-//Motors, Servos, and Lights
+//Motor Configs
+#define MOTOR_1_PWM 3
+#define MOTOR_1_D1 4
+#define MOTOR_1_D2 5
+#define MOTOR_2_PWM 6
+#define MOTOR_2_D1 7
+#define MOTOR_2_D2 8
+
+//Servo Configs
+#define LAUNCHER_PIN 9
+#define LAUNCHER_ARM_POS 140
+#define ARM_PIN 10
+#define SCOOP_PIN 11
+ 
+//Lights Configs
+#define LIGHT_DATA_PIN 12
+#define NUM_LEDS 32
+
+//Motors
 Motor motorA;
 Motor motorB;
 
-Servo launchPin;
+//Servos
+Servo launcher;
+Servo arm;
+Servo scoop;
+
+//Lights
+CRGB leds[NUM_LEDS];
+
+CRGB colorScheme[] = {
+  CHSV(0,0,100), //white
+  CHSV(0,255,100), //red
+  CHSV(0,0,255) //mega bright white
+};
 
 void setup() {
   //Initalize Serial
   Serial.begin(115200);
   
   //Initalize Motors
-  motorA.begin(4,5,3);
-  motorB.begin(7,8,6);
+  motorA.begin(MOTOR_1_D1,MOTOR_1_D2,MOTOR_1_PWM);
+  motorB.begin(MOTOR_2_D1,MOTOR_2_D2,MOTOR_2_PWM);
   
   //Initalize Servos
-  launchPin.attach(9);
-  launchPin.write(140); //set to armed position
+  launcher.write(LAUNCHER_ARM_POS); //set to armed position, is this legal?
+  launcher.attach(LAUNCHER_PIN);
+
+  arm.attach(ARM_PIN);
+
+  scoop.attach(SCOOP_PIN);
 
   //Initalize Lights
-
+  FastLED.addLeds<WS2812B, LIGHT_DATA_PIN, GRB>(leds, NUM_LEDS);
+  FastLED.clear();
 }
 
 void loop() {
@@ -46,37 +82,25 @@ void loop() {
 
 void MotorInstruction(int motor1, int motor2) {
   //data is between -255 to 255 int for speed, convert to -1 to 1 double
-  
   motorA.output(motor1/255.0f);
   motorB.output(motor2/255.0f);
 }
 
-int timeLaunched = 0;
-int timeClosed = 0;
-int inArmState = true;
-void LauncherInstruction(int launcher) {
-  //There is no data, we just care about when the packet is sent. Data can be used to control
-  //servo angles from client though, if needed.
-  if (inArmState && launcher == 1 && millis() - timeClosed > 500) {
-    launchPin.write(70);
-    timeLaunched = millis();
-    inArmState = false;
-  }
-  if (!inArmState && launcher == 0 && millis() - timeLaunched > 500) {
-    launchPin.write(140);
-    timeClosed = millis();
-    inArmState = true;
-  }
+void LauncherInstruction(int data) {
+  launcher.write(data);
 }
 
-void ArmInstruction(int arm) {
-
+void ArmInstruction(int data) {
+  arm.write(data);
 }
 
-void ScoopInstruction(int scoop) {
-    
+void ScoopInstruction(int data) {
+  scoop.write(data);
 }
 
 void LightsInstruction(JsonArray& data) {
-    
+    for (int i=0; i<data.size(); i++) {
+      leds[i] = colorScheme[(int)data[i]];
+    }
+    FastLED.show();
 }
