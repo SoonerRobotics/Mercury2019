@@ -3,6 +3,7 @@ package ouscr.mercury.networking;
 import java.io.*;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
+import java.util.Arrays;
 
 public class Frame implements Serializable
 {
@@ -16,7 +17,11 @@ public class Frame implements Serializable
         KEEPALIVE
     }
 
-    public static class KeepAlive implements Serializable {
+    public static class DataPacket implements Serializable{
+        public byte[] data;
+    }
+
+    public static class KeepAlive implements Serializable{
         public long time;
     }
 
@@ -25,7 +30,7 @@ public class Frame implements Serializable
         public String password;
     }
 
-    public FrameType type = FrameType.UNKNOWN;
+    public FrameType type;
     public byte[] bytes;
 
     public Frame(String str) throws IOException {

@@ -6,6 +6,7 @@ import com.github.strikerx3.jxinput.exceptions.XInputNotLoadedException;
 import ouscr.mercury.networking.ClientConnection;
 import ouscr.mercury.networking.Frame;
 import ouscr.mercury.serial.Arduino;
+import ouscr.mercury.ui.MercuryUI;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -32,6 +33,10 @@ public class ClientDriver {
 
     public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException, XInputNotLoadedException {
 
+        //MercuryUI ui = new MercuryUI();
+
+        Config.readConfig();
+
         // Retrieve all devices
         XInputDevice[] devices = XInputDevice.getAllDevices();
 
@@ -47,6 +52,8 @@ public class ClientDriver {
         ClientConnection connection = new ClientConnection("PC", Config.password, Config.ip, Config.port);
         connection.waitUntilConnected();
         connection.waitForOther();
+
+        //ui.start(connection);
 
         while (device.poll()) {
             XInputAxes axes = device.getComponents().getAxes();
