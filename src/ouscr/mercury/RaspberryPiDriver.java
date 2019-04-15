@@ -1,6 +1,7 @@
 package ouscr.mercury;
 
 import com.github.sarxos.webcam.Webcam;
+import com.github.sarxos.webcam.ds.v4l4j.V4l4jDriver;
 import ouscr.mercury.networking.ClientConnection;
 import ouscr.mercury.networking.Frame;
 import ouscr.mercury.networking.VideoSendThread;
@@ -32,6 +33,7 @@ public class RaspberryPiDriver {
                 new Dimension(640, 480),
         };
 
+        Webcam.setDriver(new V4l4jDriver());
         Webcam cam = Webcam.getDefault();
         cam.setCustomViewSizes(nonStandardResolutions);
         cam.setViewSize(nonStandardResolutions[0]);
