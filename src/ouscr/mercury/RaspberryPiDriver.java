@@ -17,6 +17,10 @@ public class RaspberryPiDriver {
 
     private static final Logger LOGGER = Logger.getLogger( RaspberryPiDriver.class.getName() );
 
+    static {
+        Webcam.setDriver(new V4l4jDriver());
+    }
+
     public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
         LOGGER.setLevel(Level.ALL);
 
@@ -33,7 +37,6 @@ public class RaspberryPiDriver {
                 new Dimension(640, 480),
         };
 
-        Webcam.setDriver(new V4l4jDriver());
         Webcam cam = Webcam.getDefault();
         cam.setCustomViewSizes(nonStandardResolutions);
         cam.setViewSize(nonStandardResolutions[0]);
