@@ -35,8 +35,6 @@ public class ClientDriver {
 
         //MercuryUI ui = new MercuryUI();
 
-        Config.readConfig();
-
         // Retrieve all devices
         XInputDevice[] devices = XInputDevice.getAllDevices();
 

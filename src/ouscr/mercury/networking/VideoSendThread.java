@@ -15,7 +15,7 @@ public class VideoSendThread extends Thread
     private Webcam webcam;
     private boolean calling;
 
-    private double frameRate = 1;
+    private double frameRate = 10;
 
     private ClientConnection connection;
 
@@ -39,12 +39,14 @@ public class VideoSendThread extends Thread
                 Frame.DataPacket dp = new Frame.DataPacket();
                 dp.data = fbaos.toByteArray();
                 f = new Frame(dp, Frame.FrameType.STRING);
+                Frame.DataPacket out = (Frame.DataPacket)f.deserialize();
+                System.out.println(out.data.length);
                 connection.sendFrame(f);
                 bufferedImage.flush();
                 Thread.sleep((long) (1000/frameRate));
             }
         }
-        catch (IOException | InterruptedException e)
+        catch (IOException | InterruptedException | ClassNotFoundException e)
         {
             e.printStackTrace();
         }

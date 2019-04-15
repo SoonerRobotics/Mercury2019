@@ -87,7 +87,7 @@ public class ClientConnection {
 
         //Wait until we get a non keep-alive packet
         while(true) {
-            byte[] buffer = new byte[2048];
+            byte[] buffer = new byte[1024*32];
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
             socket.receive(packet);
 

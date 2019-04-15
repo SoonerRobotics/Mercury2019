@@ -33,7 +33,7 @@ public class ServerDriver {
 
         while (running) {
             try {
-                byte[] buffer = new byte[1024];
+                byte[] buffer = new byte[1024*32];
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                 socket.receive(packet);
 
