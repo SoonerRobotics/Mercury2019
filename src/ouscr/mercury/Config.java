@@ -11,6 +11,7 @@ public class Config {
     public static String ip;
     public static int port;
     public static String password;
+    public static int fps;
 
     public static void readConfig() {
         Properties prop = new Properties();
@@ -26,6 +27,7 @@ public class Config {
                 prop.setProperty("server.ip","");
                 prop.setProperty("server.port","6372");
                 prop.setProperty("password","");
+                prop.setProperty("fps","10");
                 prop.store(out, "Top Secwet owo");
                 out.close();
             } catch (IOException e) {
@@ -44,5 +46,6 @@ public class Config {
         ip = prop.getProperty("server.ip");
         port = Integer.parseInt(prop.getProperty("server.port"));
         password = prop.getProperty("password");
+        fps = Integer.parseInt(prop.getProperty("fps"));
     }
 }

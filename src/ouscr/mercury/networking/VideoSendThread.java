@@ -9,6 +9,7 @@ import java.time.Instant;
 import javax.imageio.ImageIO;
 
 import com.github.sarxos.webcam.Webcam;
+import ouscr.mercury.Config;
 
 public class VideoSendThread extends Thread
 {
@@ -16,7 +17,7 @@ public class VideoSendThread extends Thread
     private Webcam webcam;
     private boolean calling;
 
-    private double frameRate = 15;
+    private double frameRate = Config.fps;
 
     private ClientConnection connection;
 
