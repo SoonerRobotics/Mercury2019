@@ -28,7 +28,7 @@ public class ClientDriver {
     private static final float MAX_SPEED_RIGHT = 1.0f; //max speed on a 0-1 scale.
     private static final boolean REVERSE_RIGHT = true; //reverse the direction of the right motor
 
-    private static final boolean SWAP_STICKS = false;
+    private static final boolean SWAP_STICKS = true;
 
 
     public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException, XInputNotLoadedException {

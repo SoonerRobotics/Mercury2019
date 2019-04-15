@@ -52,9 +52,11 @@ public class VideoReceiveThread extends Thread
                 if (f.type == Frame.FrameType.RAWBYTES) {
                     InputStream inputImage = new ByteArrayInputStream(f.bytes);
                     BufferedImage bufferedImage = ImageIO.read(inputImage);
+                    /*
                     AffineTransform at = AffineTransform.getRotateInstance(
                             Math.PI, bufferedImage.getWidth()/2, bufferedImage.getHeight()/2.0);
                     bufferedImage = createTransformed(bufferedImage, at);
+                    */
                     panel.getGraphics().drawImage(bufferedImage, 0, 0, 640, 480, null);
                     bufferedImage.flush();
                     inputImage.close();
