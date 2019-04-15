@@ -1,5 +1,7 @@
 package ouscr.mercury.networking;
 
+import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -24,6 +26,20 @@ public class VideoReceiveThread extends Thread
         this.calling = calling;
     }
 
+    private static BufferedImage createTransformed(
+            BufferedImage image, AffineTransform at)
+    {
+        BufferedImage newImage = new BufferedImage(
+                image.getWidth(), image.getHeight(),
+                BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = newImage.createGraphics();
+        g.transform(at);
+        g.drawImage(image, 0, 0, null);
+        g.dispose();
+        return newImage;
+    }
+
+
     @Override
     public void run()
     {
@@ -36,6 +52,9 @@ public class VideoReceiveThread extends Thread
                 if (f.type == Frame.FrameType.RAWBYTES) {
                     InputStream inputImage = new ByteArrayInputStream(f.bytes);
                     BufferedImage bufferedImage = ImageIO.read(inputImage);
+                    AffineTransform at = AffineTransform.getRotateInstance(
+                            Math.PI, bufferedImage.getWidth()/2, bufferedImage.getHeight()/2.0);
+                    bufferedImage = createTransformed(bufferedImage, at);
                     panel.getGraphics().drawImage(bufferedImage, 0, 0, 640, 480, null);
                     bufferedImage.flush();
                     inputImage.close();

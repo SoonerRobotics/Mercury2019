@@ -32,9 +32,8 @@ public class RaspberryPiDriver {
         ClientConnection connection = new ClientConnection("PI", Config.password, Config.ip, Config.port);
         connection.waitUntilConnected();
         connection.waitForOther();
-
         Dimension[] nonStandardResolutions = new Dimension[] {
-                new Dimension(640, 480),
+                new Dimension(352, 240),
         };
 
         Webcam cam = Webcam.getDefault();
