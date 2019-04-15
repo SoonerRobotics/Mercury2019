@@ -32,8 +32,8 @@ public class VideoReceiveThread extends Thread
             while (calling)
             {
                 Frame f = connection.receiveFrame();
-                Frame.DataPacket data = (Frame.DataPacket) f.deserialize();
-                InputStream inputImage = new ByteArrayInputStream(data.data);
+                InputStream inputImage = new ByteArrayInputStream(f.bytes);
+                System.out.println("read: " + f.bytes.length);
                 BufferedImage bufferedImage = ImageIO.read(inputImage);
                 panel.getGraphics().drawImage(bufferedImage, 0, 0, 800, 450, null);
                 bufferedImage.flush();

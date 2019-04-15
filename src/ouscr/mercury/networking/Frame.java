@@ -14,7 +14,8 @@ public class Frame implements Serializable
         STRING,
         RESPONSE,
         ROBOT,
-        KEEPALIVE
+        KEEPALIVE,
+        RAWBYTES
     }
 
     public static class DataPacket implements Serializable{
@@ -39,6 +40,11 @@ public class Frame implements Serializable
         os.writeObject(str);
         bytes = out.toByteArray();
         type = FrameType.STRING;
+    }
+
+    public Frame(byte[] bytes, FrameType type) throws IOException {
+        this.bytes = bytes;
+        this.type = type;
     }
 
     public Frame(Object obj, FrameType type) throws IOException {
