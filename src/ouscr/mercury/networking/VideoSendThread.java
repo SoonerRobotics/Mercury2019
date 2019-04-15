@@ -41,10 +41,10 @@ public class VideoSendThread extends Thread
                 f = new Frame(fbaos.toByteArray(), Frame.FrameType.RAWBYTES);
                 connection.sendFrame(f);
                 bufferedImage.flush();
-                Thread.sleep((long) (1000/frameRate));
+                //Thread.sleep((long) (1000/frameRate));
             }
         }
-        catch (IOException | InterruptedException e)
+        catch (IOException e)
         {
             e.printStackTrace();
         }
