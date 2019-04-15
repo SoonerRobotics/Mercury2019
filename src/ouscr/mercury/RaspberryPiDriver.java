@@ -1,9 +1,12 @@
 package ouscr.mercury;
 
+import com.github.sarxos.webcam.Webcam;
 import ouscr.mercury.networking.ClientConnection;
 import ouscr.mercury.networking.Frame;
+import ouscr.mercury.networking.VideoSendThread;
 import ouscr.mercury.serial.Arduino;
 
+import java.awt.*;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.logging.Level;
@@ -24,6 +27,19 @@ public class RaspberryPiDriver {
         ClientConnection connection = new ClientConnection("PI", Config.password, Config.ip, Config.port);
         connection.waitUntilConnected();
         connection.waitForOther();
+
+        Dimension[] nonStandardResolutions = new Dimension[] {
+                new Dimension(640, 480),
+        };
+
+        Webcam cam = Webcam.getDefault();
+        cam.setCustomViewSizes(nonStandardResolutions);
+        cam.setViewSize(nonStandardResolutions[0]);
+        cam.open();
+
+        VideoSendThread thread = new VideoSendThread(cam, true);
+        thread.setConnection(connection);
+        thread.start();
 
         Arduino.ArduinoEvent lastEvent = null;
 

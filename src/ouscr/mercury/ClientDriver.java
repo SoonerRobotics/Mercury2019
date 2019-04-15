@@ -33,7 +33,7 @@ public class ClientDriver {
 
     public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException, XInputNotLoadedException {
 
-        //MercuryUI ui = new MercuryUI();
+        MercuryUI ui = new MercuryUI();
 
         // Retrieve all devices
         XInputDevice[] devices = XInputDevice.getAllDevices();
@@ -51,7 +51,7 @@ public class ClientDriver {
         connection.waitUntilConnected();
         connection.waitForOther();
 
-        //ui.start(connection);
+        ui.start(connection);
 
         while (device.poll()) {
             XInputAxes axes = device.getComponents().getAxes();
