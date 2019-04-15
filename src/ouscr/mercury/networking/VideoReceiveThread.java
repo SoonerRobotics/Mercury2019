@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.time.Instant;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
@@ -32,12 +33,15 @@ public class VideoReceiveThread extends Thread
             while (calling)
             {
                 Frame f = connection.receiveFrame();
-                InputStream inputImage = new ByteArrayInputStream(f.bytes);
-                System.out.println("read: " + f.bytes.length);
-                BufferedImage bufferedImage = ImageIO.read(inputImage);
-                panel.getGraphics().drawImage(bufferedImage, 0, 0, 800, 450, null);
-                bufferedImage.flush();
-                inputImage.close();
+                if (f.type == Frame.FrameType.RAWBYTES) {
+                    InputStream inputImage = new ByteArrayInputStream(f.bytes);
+                    BufferedImage bufferedImage = ImageIO.read(inputImage);
+                    panel.getGraphics().drawImage(bufferedImage, 0, 0, 640, 480, null);
+                    bufferedImage.flush();
+                    inputImage.close();
+                } else if (f.type == Frame.FrameType.STRING) {
+                    System.out.println(Instant.now().toEpochMilli() - (long) f.deserialize());
+                }
             }
 
         }

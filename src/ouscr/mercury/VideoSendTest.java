@@ -17,7 +17,7 @@ public class VideoSendTest {
         connection.waitForOther();
 
         Dimension[] nonStandardResolutions = new Dimension[] {
-                new Dimension(200, 100),
+                new Dimension(640, 480),
         };
 
         Webcam cam = Webcam.getDefault();
