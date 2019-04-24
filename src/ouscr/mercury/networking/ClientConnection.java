@@ -34,7 +34,43 @@ public class ClientConnection {
 
             //have we lost connection to the server?
             long curTime = new Date().getTime();
-            lostConnection = curTime - lastReceivedPacket > TIMEOUT_PERIOID;
+
+            //have we lost connection? If so, reset literally everything we're fucked
+            if (curTime - lastReceivedPacket > TIMEOUT_PERIOID ){
+
+                connected = false;
+
+                while (!connected) {
+                    try {
+                        connect();
+                    } catch (IOException e) {
+                        System.out.println("This should never happen, but this will be here if it does.");
+                    }
+                }
+
+                tick = 1;
+
+                if(isOtherConnected()) {
+                    return;
+                }
+
+                while (true) {
+                    try {
+                        Frame response = receiveFrame();
+                        if (response.type == Frame.FrameType.RESPONSE) {
+                            connected = true;
+                            otherConnected = (boolean) response.deserialize();
+                        }
+                        break;
+                    } catch (SocketTimeoutException e) {
+                        //this is fine, just try again
+                    } catch (IOException | ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                connectionBlock.notify();
+            }
 
             tick = (tick + 1)%5;
 
@@ -60,6 +96,8 @@ public class ClientConnection {
         }
     }
 
+    private final Object connectionBlock = new Object();
+
     private static final Logger LOGGER = Logger.getLogger( ClientConnection.class.getName() );
     private DatagramSocket socket;
     private InetAddress address;
@@ -71,11 +109,9 @@ public class ClientConnection {
     private boolean connected = false;
     private boolean otherConnected = false;
     private boolean lostConnection = false;
-    private static long lastReceivedPacket = Long.MAX_VALUE;
+    private static long lastReceivedPacket = 0;
 
     private static final long TIMEOUT_PERIOID = 2000; //time in milliseconds of no packets to say disconnected
-
-    private KeepAliveScheduler keepAliveScheduler;
 
     public ClientConnection(String clientID, String password, String host, int port) throws IOException {
         //set instance data
@@ -85,6 +121,11 @@ public class ClientConnection {
 
         this.clientID = clientID;
         this.password = password;
+
+        //After we connect, keep alive
+        KeepAliveScheduler keepAliveScheduler = new KeepAliveScheduler(this);
+        Timer timer = new Timer();
+        timer.schedule(keepAliveScheduler, 1000, 100); //Keep alive every 100 milliseconds
     }
 
     public boolean isConnected() {
@@ -108,16 +149,6 @@ public class ClientConnection {
             throw new NotConnectedException();
         }
 
-        if (lostConnection) {
-            keepAliveScheduler.cancel();
-            connected = false;
-            try {
-                waitUntilConnected();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
         //Wait until we get a non keep-alive packet
         while(true) {
             byte[] buffer = new byte[1024*64];
@@ -128,29 +159,6 @@ public class ClientConnection {
             lastReceivedPacket = new Date().getTime();
             if (frame.type != Frame.FrameType.HEARTBEAT) {
                 return frame;
-            }
-        }
-    }
-
-    public void waitForOther() throws IOException, ClassNotFoundException {
-        if(!connected) {
-            throw new NotConnectedException();
-        }
-
-        if(isOtherConnected()) {
-            return;
-        }
-
-        while (true) {
-            try {
-                Frame response = receiveFrame();
-                if (response.type == Frame.FrameType.RESPONSE) {
-                    connected = true;
-                    otherConnected = (boolean) response.deserialize();
-                }
-                break;
-            } catch (SocketTimeoutException e) {
-                //this is fine, just try again
             }
         }
     }
@@ -192,15 +200,16 @@ public class ClientConnection {
         lostConnection = false;
     }
 
-    public void waitUntilConnected() throws IOException, InterruptedException {
-        while (!connected) {
-            connect();
+    public void blockUntilConnected() {
+        synchronized (connectionBlock) {
+            while (!connected) {
+                try {
+                    connectionBlock.wait();
+                } catch (InterruptedException e) {
+                    System.out.println("Couldn't block thread!");
+                }
+            }
         }
-
-        //After we connect, keep alive
-        keepAliveScheduler = new KeepAliveScheduler(this);
-        Timer timer = new Timer();
-        timer.schedule(keepAliveScheduler, 1000, 100); //Keep alive every 100 milliseconds
     }
 
     public boolean isOtherConnected() {

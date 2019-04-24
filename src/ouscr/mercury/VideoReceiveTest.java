@@ -14,8 +14,6 @@ public class VideoReceiveTest {
 
         System.out.println("ip: " + Config.ip + ", pass: " + Config.password);
         ClientConnection connection = new ClientConnection("PC", Config.password, Config.ip, Config.port);
-        connection.waitUntilConnected();
-        connection.waitForOther();
 
         ui.start(connection);
     }

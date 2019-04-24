@@ -31,8 +31,8 @@ public class RaspberryPiDriver {
         arduino.open();
 
         ClientConnection connection = new ClientConnection("PI", Config.password, Config.ip, Config.port);
-        connection.waitUntilConnected();
-        connection.waitForOther();
+        connection.blockUntilConnected();
+
         Dimension[] nonStandardResolutions = new Dimension[] {
                 new Dimension(192, 108),
         };

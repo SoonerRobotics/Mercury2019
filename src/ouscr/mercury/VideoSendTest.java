@@ -13,8 +13,6 @@ public class VideoSendTest {
         Config.readConfig();
 
         ClientConnection connection = new ClientConnection("PI", Config.password, Config.ip, Config.port);
-        connection.waitUntilConnected();
-        connection.waitForOther();
 
         Dimension[] nonStandardResolutions = new Dimension[] {
                 new Dimension(640, 480),

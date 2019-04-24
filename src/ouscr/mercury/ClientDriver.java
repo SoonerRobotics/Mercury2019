@@ -48,8 +48,7 @@ public class ClientDriver {
         XInputDevice device = XInputDevice.getDeviceFor(0); // or devices[0]
 
         ClientConnection connection = new ClientConnection("PC", Config.password, Config.ip, Config.port);
-        connection.waitUntilConnected();
-        connection.waitForOther();
+        connection.blockUntilConnected();
 
         ui.start(connection);
 
