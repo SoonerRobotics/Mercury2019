@@ -131,10 +131,16 @@ public class ClientConnection {
             return;
         }
 
-        Frame response = receiveFrame();
-        if (response.type == Frame.FrameType.RESPONSE) {
-            connected = true;
-            otherConnected = (boolean) response.deserialize();
+        while (true) {
+            try {
+                Frame response = receiveFrame();
+                if (response.type == Frame.FrameType.RESPONSE) {
+                    connected = true;
+                    otherConnected = (boolean) response.deserialize();
+                }
+            } catch (SocketTimeoutException e) {
+                //this is fine, just try again
+            }
         }
     }
 
