@@ -110,6 +110,7 @@ public class ClientConnection {
 
         if (lostConnection) {
             keepAliveScheduler.cancel();
+            connected = false;
             try {
                 waitUntilConnected();
             } catch (InterruptedException e) {

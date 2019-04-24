@@ -28,7 +28,7 @@ public class ClientDriver {
     private static final float MAX_SPEED_RIGHT = 0.7f; //max speed on a 0-1 scale.
     private static final boolean REVERSE_RIGHT = true; //reverse the direction of the right motor
 
-    private static final boolean SWAP_STICKS = false;
+    private static final boolean SWAP_STICKS = true;
 
 
     public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException, XInputNotLoadedException {
@@ -92,9 +92,9 @@ public class ClientDriver {
             event.launcher = axes.rt > 0.8 ? 40 : 115;
 
             if (device.getComponents().getButtons().left) {
-                event.arm = 40;
+                event.arm = 50;
             } else {
-                event.arm = 145;
+                event.arm = 140;
             }
 
             event.lights = new int[32];
