@@ -21,11 +21,11 @@ public class ClientDriver {
     private static final float DEADZONE = 0.15f; //deadzone percentages
 
     private static final float MIN_SPEED_LEFT = 0f; //the speed we reach right after pushing past the deadzone
-    private static final float MAX_SPEED_LEFT = 1.0f; //max speed on a 0-1 scale.
+    private static final float MAX_SPEED_LEFT = 0.7f; //max speed on a 0-1 scale.
     private static final boolean REVERSE_LEFT = false; //reverse the direction of the left motor
 
     private static final float MIN_SPEED_RIGHT = 0f; //the speed we reach right after pushing past the deadzone
-    private static final float MAX_SPEED_RIGHT = 1.0f; //max speed on a 0-1 scale.
+    private static final float MAX_SPEED_RIGHT = 0.7f; //max speed on a 0-1 scale.
     private static final boolean REVERSE_RIGHT = true; //reverse the direction of the right motor
 
     private static final boolean SWAP_STICKS = false;
@@ -94,7 +94,7 @@ public class ClientDriver {
             if (device.getComponents().getButtons().left) {
                 event.arm = 40;
             } else {
-                event.arm = 115;
+                event.arm = 145;
             }
 
             event.lights = new int[32];

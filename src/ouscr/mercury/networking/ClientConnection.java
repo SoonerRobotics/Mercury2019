@@ -108,6 +108,15 @@ public class ClientConnection {
             throw new NotConnectedException();
         }
 
+        if (lostConnection) {
+            keepAliveScheduler.cancel();
+            try {
+                waitUntilConnected();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
         //Wait until we get a non keep-alive packet
         while(true) {
             byte[] buffer = new byte[1024*64];
@@ -178,6 +187,8 @@ public class ClientConnection {
         } catch (ClassNotFoundException e) {
             LOGGER.log(Level.SEVERE, "Message received was not formatted correctly.");
         }
+
+        lostConnection = false;
     }
 
     public void waitUntilConnected() throws IOException, InterruptedException {

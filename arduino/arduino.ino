@@ -75,6 +75,7 @@ void loop() {
       }
       if (status == 1) {
         WereFucked();
+        MotorInstruction(0,0);
       }
     }
     
