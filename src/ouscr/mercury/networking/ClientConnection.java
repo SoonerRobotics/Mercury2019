@@ -69,7 +69,9 @@ public class ClientConnection {
                     }
                 }
 
-                connectionBlock.notify();
+                synchronized (connectionBlock) {
+                    connectionBlock.notify();
+                }
             }
 
             tick = (tick + 1)%5;
