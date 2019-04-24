@@ -138,6 +138,7 @@ public class ClientConnection {
                     connected = true;
                     otherConnected = (boolean) response.deserialize();
                 }
+                break;
             } catch (SocketTimeoutException e) {
                 //this is fine, just try again
             }
