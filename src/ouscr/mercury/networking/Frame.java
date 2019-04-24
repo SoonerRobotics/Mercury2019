@@ -14,7 +14,7 @@ public class Frame implements Serializable
         STRING,
         RESPONSE,
         ROBOT,
-        KEEPALIVE,
+        HEARTBEAT,
         RAWBYTES
     }
 
@@ -22,8 +22,10 @@ public class Frame implements Serializable
         public byte[] data;
     }
 
-    public static class KeepAlive implements Serializable{
-        public long time;
+    public static class Heartbeat implements Serializable{
+        public long id;
+        public long sendTime;
+        public long receiveTime;
     }
 
     public static class Handshake implements Serializable {

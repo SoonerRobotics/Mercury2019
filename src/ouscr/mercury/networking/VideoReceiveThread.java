@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.time.Instant;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
@@ -48,20 +49,24 @@ public class VideoReceiveThread extends Thread
         {
             while (calling)
             {
-                Frame f = connection.receiveFrame();
-                if (f.type == Frame.FrameType.RAWBYTES) {
-                    InputStream inputImage = new ByteArrayInputStream(f.bytes);
-                    BufferedImage bufferedImage = ImageIO.read(inputImage);
-                    /*
-                    AffineTransform at = AffineTransform.getRotateInstance(
-                            Math.PI, bufferedImage.getWidth()/2, bufferedImage.getHeight()/2.0);
-                    bufferedImage = createTransformed(bufferedImage, at);
-                    */
-                    panel.getGraphics().drawImage(bufferedImage, 0, 0, 640, 480, null);
-                    bufferedImage.flush();
-                    inputImage.close();
-                } else if (f.type == Frame.FrameType.STRING) {
-                    System.out.println(Instant.now().toEpochMilli() - (long) f.deserialize());
+                try {
+                    Frame f = connection.receiveFrame();
+                    if (f.type == Frame.FrameType.RAWBYTES) {
+                        InputStream inputImage = new ByteArrayInputStream(f.bytes);
+                        BufferedImage bufferedImage = ImageIO.read(inputImage);
+                        /*
+                        AffineTransform at = AffineTransform.getRotateInstance(
+                                Math.PI, bufferedImage.getWidth()/2, bufferedImage.getHeight()/2.0);
+                        bufferedImage = createTransformed(bufferedImage, at);
+                        */
+                        panel.getGraphics().drawImage(bufferedImage, 0, 0, (int)(192*4), (int)(108*4), null);
+                        bufferedImage.flush();
+                        inputImage.close();
+                    } else if (f.type == Frame.FrameType.STRING) {
+                        System.out.println(Instant.now().toEpochMilli() - (long) f.deserialize());
+                    }
+                } catch (SocketTimeoutException e) {
+                    System.out.println("Timeout occured, disconeccted: " + connection.lostConnection());
                 }
             }
 

@@ -14,13 +14,15 @@ import java.util.logging.Logger;
 public class ClientConnection {
 
     public class NotConnectedException extends RuntimeException {
-        public NotConnectedException() {
+        NotConnectedException() {
             super("Not connected to server.");
         }
     }
 
     class KeepAliveScheduler extends TimerTask {
 
+        long curId = 0;
+        long tick = 0;
         ClientConnection conn;
 
         KeepAliveScheduler(ClientConnection connection) {
@@ -29,18 +31,31 @@ public class ClientConnection {
 
         @Override
         public void run() {
-            Frame.KeepAlive packet = new Frame.KeepAlive();
-            packet.time = new Date().getTime();
-            Frame frame = null;
-            try {
-                frame = new Frame(packet, Frame.FrameType.KEEPALIVE);
-            } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, "Could not create keep alive packet!");
-            }
-            try {
-                conn.sendFrame(frame);
-            } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, "Could not send keep alive packet!");
+
+            //have we lost connection to the server?
+            long curTime = new Date().getTime();
+            lostConnection = curTime - lastReceivedPacket > TIMEOUT_PERIOID;
+
+            tick = (tick + 1)%5;
+
+            //every five keepalives, send a packet to test aliveness
+            if (tick == 0) {
+                Frame.Heartbeat packet = new Frame.Heartbeat();
+                packet.sendTime = new Date().getTime();
+                packet.id = curId;
+                curId++;
+
+                Frame frame = null;
+                try {
+                    frame = new Frame(packet, Frame.FrameType.HEARTBEAT);
+                } catch (IOException e) {
+                    LOGGER.log(Level.SEVERE, "Could not create heartbeat packet!");
+                }
+                try {
+                    conn.sendFrame(frame);
+                } catch (IOException e) {
+                    LOGGER.log(Level.SEVERE, "Could not send heartbeat packet!");
+                }
             }
         }
     }
@@ -55,6 +70,10 @@ public class ClientConnection {
 
     private boolean connected = false;
     private boolean otherConnected = false;
+    private boolean lostConnection = false;
+    private static long lastReceivedPacket = Long.MAX_VALUE;
+
+    private static final long TIMEOUT_PERIOID = 2000; //time in milliseconds of no packets to say disconnected
 
     private KeepAliveScheduler keepAliveScheduler;
 
@@ -70,6 +89,10 @@ public class ClientConnection {
 
     public boolean isConnected() {
         return connected;
+    }
+
+    public boolean lostConnection() {
+        return lostConnection;
     }
 
     public void sendFrame(Frame frame) throws IOException{
@@ -92,7 +115,8 @@ public class ClientConnection {
             socket.receive(packet);
 
             Frame frame = new Frame(packet.getData());
-            if (frame.type != Frame.FrameType.KEEPALIVE) {
+            lastReceivedPacket = new Date().getTime();
+            if (frame.type != Frame.FrameType.HEARTBEAT) {
                 return frame;
             }
         }
@@ -115,7 +139,7 @@ public class ClientConnection {
     }
 
     public void connect() throws IOException {
-        socket.setSoTimeout(2000); //TODO: Figure out good value for this
+        socket.setSoTimeout(200); //TODO: Figure out good value for this
 
         //handshake with server
         Frame.Handshake handshake = new Frame.Handshake();
@@ -159,7 +183,7 @@ public class ClientConnection {
         //After we connect, keep alive
         keepAliveScheduler = new KeepAliveScheduler(this);
         Timer timer = new Timer();
-        timer.schedule(keepAliveScheduler, 1000, 10000); //Keep alive every 10 seconds
+        timer.schedule(keepAliveScheduler, 1000, 100); //Keep alive every 100 milliseconds
     }
 
     public boolean isOtherConnected() {

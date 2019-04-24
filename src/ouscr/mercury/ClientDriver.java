@@ -20,15 +20,15 @@ public class ClientDriver {
 
     private static final float DEADZONE = 0.15f; //deadzone percentages
 
-    private static final float MIN_SPEED_LEFT = 0.4f; //the speed we reach right after pushing past the deadzone
+    private static final float MIN_SPEED_LEFT = 0f; //the speed we reach right after pushing past the deadzone
     private static final float MAX_SPEED_LEFT = 1.0f; //max speed on a 0-1 scale.
     private static final boolean REVERSE_LEFT = false; //reverse the direction of the left motor
 
-    private static final float MIN_SPEED_RIGHT = 0.4f; //the speed we reach right after pushing past the deadzone
+    private static final float MIN_SPEED_RIGHT = 0f; //the speed we reach right after pushing past the deadzone
     private static final float MAX_SPEED_RIGHT = 1.0f; //max speed on a 0-1 scale.
     private static final boolean REVERSE_RIGHT = true; //reverse the direction of the right motor
 
-    private static final boolean SWAP_STICKS = true;
+    private static final boolean SWAP_STICKS = false;
 
 
     public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException, XInputNotLoadedException {
@@ -85,37 +85,21 @@ public class ClientDriver {
             }
 
             Arduino.ArduinoEvent event = new Arduino.ArduinoEvent();
+
             event.motor1 = data[0];
             event.motor2 = data[1];
-            event.launcher = axes.rt > 0.8 ? 80 : 140;
+
+            event.launcher = axes.rt > 0.8 ? 40 : 115;
+
             if (device.getComponents().getButtons().left) {
-                event.arm = -1;
-            } else if (device.getComponents().getButtons().right) {
-                event.arm = 1;
+                event.arm = 40;
             } else {
-                event.arm = 0;
+                event.arm = 115;
             }
-            if (device.getComponents().getButtons().up) {
-                event.scoop = 1;
-            } else if (device.getComponents().getButtons().down) {
-                event.scoop = -1;
-            } else {
-                event.scoop = 0;
-            }
-
-            /*
-            //only send when there is no new information
-            if (instructions.leftMotor != lastLeft || instructions.rightMotor != lastRight) {
-                connection.sendFrame(new Frame(instructions, Frame.FrameType.ROBOT));
-                lastLeft = instructions.leftMotor;
-                lastRight = instructions.rightMotor;
-            }
-            */
-
 
             event.lights = new int[32];
             for (int i=0; i<32; i++) {
-                event.lights[i] = (axes.lt*32) > i ? 1 : 0;
+                event.lights[i] = (axes.lt*32) > i ? 2 : 0;
             }
 
             connection.sendFrame(new Frame(event, Frame.FrameType.ROBOT));

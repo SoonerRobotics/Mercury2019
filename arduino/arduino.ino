@@ -28,7 +28,6 @@ Motor motorB;
 //Servos
 Servo launcher;
 Servo arm;
-Servo scoop;
 
 //Lights
 CRGB leds[NUM_LEDS];
@@ -53,8 +52,6 @@ void setup() {
 
   arm.attach(ARM_PIN);
 
-  scoop.attach(SCOOP_PIN);
-
   //Initalize Lights
   FastLED.addLeds<WS2812B, LIGHT_DATA_PIN, GRB>(leds, NUM_LEDS);
   FastLED.clear();
@@ -69,11 +66,16 @@ void loop() {
     JsonObject& obj = jsonBuffer.parse(comms);
     
     if (obj.success()) {
-      MotorInstruction(obj["motor1"], obj["motor2"]);
-      LauncherInstruction(obj["launcher"]);
-      ArmInstruction(obj["arm"]);
-      ScoopInstruction(obj["scoop"]);
-      LightsInstruction(obj["lights"]);
+      int status = obj["status"];
+      if (status == 0) {
+        MotorInstruction(obj["motor1"], obj["motor2"]);
+        LauncherInstruction(obj["launcher"]);
+        ArmInstruction(obj["arm"]);
+        LightsInstruction(obj["lights"]);
+      }
+      if (status == 1) {
+        WereFucked();
+      }
     }
     
     Serial.write(1);
@@ -94,14 +96,26 @@ void ArmInstruction(int data) {
   arm.write(data);
 }
 
-void ScoopInstruction(int data) {
-  scoop.write(data);
+void LightsInstruction(JsonArray& data) {
+  for (unsigned int i=0; i<data.size(); i++) {
+    int datai = data[i];
+    leds[i] = colorScheme[datai];
+  }
+  FastLED.show();
 }
 
-void LightsInstruction(JsonArray& data) {
-    for (int i=0; i<data.size(); i++) {
-      int datai = data[i];
-      leds[i] = colorScheme[datai];
+bool red = false;
+void WereFucked() {
+  if (red) {
+    red = false;
+    for (int i=0; i<NUM_LEDS; i++) {
+      leds[i] = colorScheme[0];
     }
-    FastLED.show();
+  } else {
+    red = true;
+    for (int i=0; i<NUM_LEDS; i++) {
+      leds[i] = colorScheme[1];
+    }
+  }
+  FastLED.show();
 }

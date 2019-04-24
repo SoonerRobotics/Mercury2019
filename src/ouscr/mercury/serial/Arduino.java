@@ -29,11 +29,11 @@ public class Arduino {
         private static GsonBuilder builder = new GsonBuilder();
         private static Gson gson = builder.create();
 
+        public int status = 0;
         public int motor1;
         public int motor2;
         public int launcher;
         public int arm;
-        public int scoop;
         public int[] lights;
 
         public String getJson() {

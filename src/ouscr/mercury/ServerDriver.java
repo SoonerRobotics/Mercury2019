@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -58,6 +59,20 @@ public class ServerDriver {
                             LOGGER.log(Level.WARNING, "Correct password received but invalid clientID: " + handshake.clientID);
                         }
                     }
+                } else if (handshakeFrame.type == Frame.FrameType.HEARTBEAT) {
+                    Frame.Heartbeat heartbeat = (Frame.Heartbeat)handshakeFrame.deserialize();
+                    heartbeat.receiveTime = new Date().getTime();
+                    handshakeFrame = new Frame(heartbeat, Frame.FrameType.HEARTBEAT);
+                    DatagramPacket returnPacket = null;
+                    if (packet.getAddress().equals(PC) && packet.getPort() == PC_port) {
+                        returnPacket = handshakeFrame.getPacket(PC, PC_port);
+                    } else if (packet.getAddress().equals(PI) && packet.getPort() == PI_port) {
+                        returnPacket = handshakeFrame.getPacket(PI, PI_port);
+                    } else {
+                        LOGGER.log(Level.INFO, "Unknown sender.");
+                    }
+                    if (returnPacket != null)
+                        socket.send(returnPacket);
                 } else {
                     if (PC_port != -1 && PI_port != -1) {
                         if (packet.getAddress().equals(PC) && packet.getPort() == PC_port) {
