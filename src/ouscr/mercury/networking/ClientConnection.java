@@ -171,8 +171,6 @@ public class ClientConnection {
         } catch (ClassNotFoundException e) {
             LOGGER.log(Level.SEVERE, "Message received was not formatted correctly.");
         }
-
-        socket.setSoTimeout(0);
     }
 
     public void waitUntilConnected() throws IOException, InterruptedException {
