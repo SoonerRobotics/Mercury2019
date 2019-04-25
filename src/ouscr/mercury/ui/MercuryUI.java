@@ -15,7 +15,7 @@ public class MercuryUI extends JFrame {
         server = new VideoReceiveThread(panel, true);
 
         add(panel);
-        setPreferredSize(new Dimension(1600, 1600));
+        setPreferredSize(new Dimension(1200, 800));
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         pack();
         setVisible(true);

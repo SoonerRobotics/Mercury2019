@@ -47,31 +47,17 @@ public class RaspberryPiDriver {
         thread.start();
 
         while (running) {
-            try {
-                Frame in = connection.receiveFrame();
-                if (in.type == Frame.FrameType.ROBOT) {
-                    //LOGGER.log(Level.FINE, "Robot Instructions: " + Arrays.toString(in.bytes));
+            Frame in = connection.receiveFrame();
+            if (in.type == Frame.FrameType.ROBOT) {
+                //LOGGER.log(Level.FINE, "Robot Instructions: " + Arrays.toString(in.bytes));
 
-                    //Literally just write any ArduinoEvent to the Arduino
-                    Arduino.ArduinoEvent event = (Arduino.ArduinoEvent) in.deserialize();
+                //Literally just write any ArduinoEvent to the Arduino
+                Arduino.ArduinoEvent event = (Arduino.ArduinoEvent) in.deserialize();
 
-                    //uncomment until arduino doesnt exist
-                    arduino.write(event);
+                //uncomment until arduino doesnt exist
+                arduino.write(event);
 
-                    System.out.println(event.getJson());
-                }
-            } catch (SocketTimeoutException e) {
-                /*
-                System.out.println("Sending connection lost to servo! status ");
-                if (connection.lostConnection()) {
-                    //Literally just write any ArduinoEvent to the Arduino
-                    Arduino.ArduinoEvent event = new Arduino.ArduinoEvent();
-                    event.status = 1;
-
-                    //uncomment until arduino doesnt exist
-                    arduino.write(event);
-                }
-                */
+                System.out.println(event.getJson());
             }
         }
 

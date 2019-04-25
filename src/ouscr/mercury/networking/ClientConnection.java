@@ -19,90 +19,79 @@ public class ClientConnection {
         }
     }
 
-    class KeepAliveScheduler extends TimerTask {
+    class ConnectionManagerThread extends Thread {
 
         long curId = 0;
         long tick = 0;
         ClientConnection conn;
 
-        boolean running = false;
-
-        KeepAliveScheduler(ClientConnection connection) {
+        ConnectionManagerThread(ClientConnection connection) {
             conn = connection;
         }
 
         @Override
         public void run() {
-            if (running) {
-                return;
-            }
+            while (!Thread.currentThread().isInterrupted()) {
+                //have we lost connection to the server?
+                long curTime = new Date().getTime();
 
-            running = true;
+                //have we lost connection? If so, reset literally everything we're fucked
+                if (connected && curTime - lastReceivedPacket > TIMEOUT_PERIOID) {
+                    System.out.println("lost connection, uh oh");
+                    connected = false;
 
-            //have we lost connection to the server?
-            long curTime = new Date().getTime();
-
-            //have we lost connection? If so, reset literally everything we're fucked
-            if (curTime - lastReceivedPacket > TIMEOUT_PERIOID ){
-                connected = false;
-
-                while (!connected) {
-                    try {
-                        connect();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                tick = 1;
-
-                if(isOtherConnected()) {
-                    return;
-                }
-
-                while (true) {
-                    try {
-                        Frame response = receiveFrame();
-                        if (response.type == Frame.FrameType.RESPONSE) {
-                            connected = true;
-                            otherConnected = (boolean) response.deserialize();
+                    while (!connected) {
+                        try {
+                            connect();
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
-                        break;
-                    } catch (SocketTimeoutException e) {
-                        //this is fine, just try again
-                    } catch (IOException | ClassNotFoundException e) {
-                        e.printStackTrace();
+                    }
+
+                    if (!isOtherConnected()) {
+                        while (true) {
+                            try {
+                                Frame response = receiveFrame();
+                                if (response.type == Frame.FrameType.RESPONSE) {
+                                    otherConnected = (boolean) response.deserialize();
+                                }
+                                break;
+                            } catch (SocketTimeoutException e) {
+                                //this is fine, just try again
+                            } catch (IOException | ClassNotFoundException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+
+                    synchronized (connectionBlock) {
+                        connectionBlock.notify();
                     }
                 }
 
-                synchronized (connectionBlock) {
-                    connectionBlock.notify();
+                tick = (tick + 1) % 5;
+
+                //every five keepalives, send a packet to test aliveness
+                if (tick == 0) {
+                    Frame.Heartbeat packet = new Frame.Heartbeat();
+                    packet.sendTime = new Date().getTime();
+                    packet.id = curId;
+                    curId++;
+
+                    Frame frame = null;
+                    try {
+                        frame = new Frame(packet, Frame.FrameType.HEARTBEAT);
+                    } catch (IOException e) {
+                        LOGGER.log(Level.SEVERE, "Could not create heartbeat packet!");
+                    }
+                    try {
+                        conn.sendFrame(frame);
+                    } catch (IOException e) {
+                        LOGGER.log(Level.SEVERE, "Could not send heartbeat packet!");
+                    }
                 }
+
             }
-
-            tick = (tick + 1)%5;
-
-            //every five keepalives, send a packet to test aliveness
-            if (tick == 0) {
-                Frame.Heartbeat packet = new Frame.Heartbeat();
-                packet.sendTime = new Date().getTime();
-                packet.id = curId;
-                curId++;
-
-                Frame frame = null;
-                try {
-                    frame = new Frame(packet, Frame.FrameType.HEARTBEAT);
-                } catch (IOException e) {
-                    LOGGER.log(Level.SEVERE, "Could not create heartbeat packet!");
-                }
-                try {
-                    conn.sendFrame(frame);
-                } catch (IOException e) {
-                    LOGGER.log(Level.SEVERE, "Could not send heartbeat packet!");
-                }
-            }
-
-            running = false;
         }
     }
 
@@ -131,10 +120,32 @@ public class ClientConnection {
         this.clientID = clientID;
         this.password = password;
 
-        //After we connect, keep alive
-        KeepAliveScheduler keepAliveScheduler = new KeepAliveScheduler(this);
-        Timer timer = new Timer();
-        timer.schedule(keepAliveScheduler, 1000, 100); //Keep alive every 100 milliseconds
+        while (!connected) {
+            try {
+                connect();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (!isOtherConnected()) {
+            while (true) {
+                try {
+                    Frame response = receiveFrame();
+                    if (response.type == Frame.FrameType.RESPONSE) {
+                        otherConnected = (boolean) response.deserialize();
+                    }
+                    break;
+                } catch (SocketTimeoutException e) {
+                    //this is fine, just try again
+                } catch (IOException | ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        ConnectionManagerThread cmt = new ConnectionManagerThread(this);
+        cmt.start();
     }
 
     public boolean isConnected() {
@@ -157,20 +168,24 @@ public class ClientConnection {
 
         //Wait until we get a non keep-alive packet
         while(true) {
-            byte[] buffer = new byte[1024*64];
-            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-            socket.receive(packet);
+            try {
+                byte[] buffer = new byte[1024 * 64];
+                DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+                socket.receive(packet);
 
-            Frame frame = new Frame(packet.getData());
-            lastReceivedPacket = new Date().getTime();
-            if (frame.type != Frame.FrameType.HEARTBEAT) {
-                return frame;
+                Frame frame = new Frame(packet.getData());
+                lastReceivedPacket = new Date().getTime();
+                if (frame.type != Frame.FrameType.HEARTBEAT) {
+                    return frame;
+                }
+            } catch (SocketTimeoutException e) {
+                //this is fine...
             }
         }
     }
 
     public void connect() throws IOException {
-        socket.setSoTimeout(200); //TODO: Figure out good value for this
+        socket.setSoTimeout(400); //TODO: Figure out good value for this
 
         //handshake with server
         Frame.Handshake handshake = new Frame.Handshake();
@@ -197,6 +212,7 @@ public class ClientConnection {
 
             if (responseFrame.type == Frame.FrameType.RESPONSE) {
                 connected = true;
+                System.out.println("connected!");
                 otherConnected = (boolean) responseFrame.deserialize();
             } else {
                 LOGGER.log(Level.SEVERE, "Something other than a response with given.");

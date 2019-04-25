@@ -48,9 +48,15 @@ public class ClientDriver {
         XInputDevice device = XInputDevice.getDeviceFor(0); // or devices[0]
 
         ClientConnection connection = new ClientConnection("PC", Config.password, Config.ip, Config.port);
+        System.out.println("waiting for connect");
         connection.blockUntilConnected();
 
+        System.out.println("b4 start");
+
+
         ui.start(connection);
+
+        System.out.println("after start");
 
         while (device.poll()) {
             XInputAxes axes = device.getComponents().getAxes();
