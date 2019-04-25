@@ -112,7 +112,7 @@ public class ClientConnection {
     private boolean otherConnected = false;
     private static long lastReceivedPacket = Long.MAX_VALUE;
 
-    private static final long TIMEOUT_PERIOID = 2000; //time in milliseconds of no packets to say disconnected
+    private static final long TIMEOUT_PERIOID = 3500; //time in milliseconds of no packets to say disconnected
 
     public ClientConnection(String clientID, String password, String host, int port) throws IOException {
         //set instance data

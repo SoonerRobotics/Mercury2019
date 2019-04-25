@@ -69,6 +69,7 @@ void setup() {
 void loop() {
   //wait for data
   if (Serial.available() > 0) {
+    lastSignal = millis();
     String comms = Serial.readStringUntil('\n');
     
     StaticJsonBuffer<512> jsonBuffer;
