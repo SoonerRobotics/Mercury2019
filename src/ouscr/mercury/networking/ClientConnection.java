@@ -69,28 +69,30 @@ public class ClientConnection {
                     }
                 }
 
-                tick = (tick + 1) % 5;
 
-                //every five keepalives, send a packet to test aliveness
-                if (tick == 0) {
-                    Frame.Heartbeat packet = new Frame.Heartbeat();
-                    packet.sendTime = new Date().getTime();
-                    packet.id = curId;
-                    curId++;
+                //send heartbeat
+                Frame.Heartbeat packet = new Frame.Heartbeat();
+                packet.sendTime = new Date().getTime();
+                packet.id = curId;
+                curId++;
 
-                    Frame frame = null;
-                    try {
-                        frame = new Frame(packet, Frame.FrameType.HEARTBEAT);
-                    } catch (IOException e) {
-                        LOGGER.log(Level.SEVERE, "Could not create heartbeat packet!");
-                    }
-                    try {
-                        conn.sendFrame(frame);
-                    } catch (IOException e) {
-                        LOGGER.log(Level.SEVERE, "Could not send heartbeat packet!");
-                    }
+                Frame frame = null;
+                try {
+                    frame = new Frame(packet, Frame.FrameType.HEARTBEAT);
+                } catch (IOException e) {
+                    LOGGER.log(Level.SEVERE, "Could not create heartbeat packet!");
+                }
+                try {
+                    conn.sendFrame(frame);
+                } catch (IOException e) {
+                    LOGGER.log(Level.SEVERE, "Could not send heartbeat packet!");
                 }
 
+                try {
+                    Thread.sleep(350);
+                } catch (InterruptedException e) {
+                    System.out.println("can't sleep uwu");
+                }
             }
         }
     }
@@ -107,7 +109,7 @@ public class ClientConnection {
 
     private boolean connected = false;
     private boolean otherConnected = false;
-    private static long lastReceivedPacket = 0;
+    private static long lastReceivedPacket = Long.MAX_VALUE;
 
     private static final long TIMEOUT_PERIOID = 2000; //time in milliseconds of no packets to say disconnected
 
@@ -214,9 +216,11 @@ public class ClientConnection {
                 connected = true;
                 System.out.println("connected!");
                 otherConnected = (boolean) responseFrame.deserialize();
-            } else {
-                LOGGER.log(Level.SEVERE, "Something other than a response with given.");
             }
+
+            //else
+            //LOGGER.log(Level.SEVERE, "Something other than a response with given.");
+
         } catch (ClassNotFoundException e) {
             LOGGER.log(Level.SEVERE, "Message received was not formatted correctly.");
         }
