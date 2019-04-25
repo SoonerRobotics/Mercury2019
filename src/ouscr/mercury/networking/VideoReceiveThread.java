@@ -66,7 +66,7 @@ public class VideoReceiveThread extends Thread
                         System.out.println(Instant.now().toEpochMilli() - (long) f.deserialize());
                     }
                 } catch (SocketTimeoutException e) {
-                    System.out.println("Timeout occured, disconeccted: " + connection.lostConnection());
+                    System.out.println("Timeout occured, disconeccted: ");
                 }
             }
 

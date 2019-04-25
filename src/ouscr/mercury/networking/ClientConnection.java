@@ -44,7 +44,7 @@ public class ClientConnection {
                     try {
                         connect();
                     } catch (IOException e) {
-                        System.out.println("This should never happen, but this will be here if it does.");
+                        e.printStackTrace();
                     }
                 }
 
@@ -68,6 +68,8 @@ public class ClientConnection {
                         e.printStackTrace();
                     }
                 }
+
+                connected = true;
 
                 synchronized (connectionBlock) {
                     connectionBlock.notify();
@@ -110,7 +112,6 @@ public class ClientConnection {
 
     private boolean connected = false;
     private boolean otherConnected = false;
-    private boolean lostConnection = false;
     private static long lastReceivedPacket = 0;
 
     private static final long TIMEOUT_PERIOID = 2000; //time in milliseconds of no packets to say disconnected
@@ -132,10 +133,6 @@ public class ClientConnection {
 
     public boolean isConnected() {
         return connected;
-    }
-
-    public boolean lostConnection() {
-        return lostConnection;
     }
 
     public void sendFrame(Frame frame) throws IOException{
@@ -198,8 +195,6 @@ public class ClientConnection {
         } catch (ClassNotFoundException e) {
             LOGGER.log(Level.SEVERE, "Message received was not formatted correctly.");
         }
-
-        lostConnection = false;
     }
 
     public void blockUntilConnected() {

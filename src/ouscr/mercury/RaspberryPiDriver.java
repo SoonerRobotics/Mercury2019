@@ -61,7 +61,8 @@ public class RaspberryPiDriver {
                     System.out.println(event.getJson());
                 }
             } catch (SocketTimeoutException e) {
-                System.out.println("Sending connection lost to arduino! status " + connection.lostConnection());
+                /*
+                System.out.println("Sending connection lost to servo! status ");
                 if (connection.lostConnection()) {
                     //Literally just write any ArduinoEvent to the Arduino
                     Arduino.ArduinoEvent event = new Arduino.ArduinoEvent();
@@ -70,6 +71,7 @@ public class RaspberryPiDriver {
                     //uncomment until arduino doesnt exist
                     arduino.write(event);
                 }
+                */
             }
         }
 
