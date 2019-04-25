@@ -1,5 +1,6 @@
 package ouscr.mercury.networking;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -186,6 +187,29 @@ public class ClientConnection {
         }
     }
 
+    public Frame receiveFrameNonBlocking() throws IOException, ClassNotFoundException {
+        if (!connected) {
+            return null;
+        }
+
+        //Wait until we get a non keep-alive packet
+        while(true) {
+            try {
+                byte[] buffer = new byte[1024 * 64];
+                DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+                socket.receive(packet);
+
+                Frame frame = new Frame(packet.getData());
+                lastReceivedPacket = new Date().getTime();
+                if (frame.type != Frame.FrameType.HEARTBEAT) {
+                    return frame;
+                }
+            } catch (SocketTimeoutException e) {
+                //this is fine...
+            }
+        }
+    }
+
     public void connect() throws IOException {
         socket.setSoTimeout(400); //TODO: Figure out good value for this
 
@@ -198,31 +222,36 @@ public class ClientConnection {
         DatagramPacket packet = handshakeFrame.getPacket(address, port);
         socket.send(packet);
 
-        byte[] buffer = new byte[1024];
-        packet = new DatagramPacket(buffer, buffer.length);
-        try {
-            socket.receive(packet);
-        } catch (SocketTimeoutException e) {
-            LOGGER.log(Level.SEVERE, "Received no ack from the server.");
-            return;
-        }
-
-        lastReceivedPacket = new Date().getTime();
-
-        try {
-            Frame responseFrame = new Frame(packet.getData());
-
-            if (responseFrame.type == Frame.FrameType.RESPONSE) {
-                connected = true;
-                System.out.println("connected!");
-                otherConnected = (boolean) responseFrame.deserialize();
+        //wait for connection
+        while (true) {
+            byte[] buffer = new byte[1024];
+            packet = new DatagramPacket(buffer, buffer.length);
+            try {
+                socket.receive(packet);
+            } catch (SocketTimeoutException e) {
+                LOGGER.log(Level.SEVERE, "Received no ack from the server.");
+                return;
             }
 
-            //else
-            //LOGGER.log(Level.SEVERE, "Something other than a response with given.");
+            lastReceivedPacket = new Date().getTime();
 
-        } catch (ClassNotFoundException e) {
-            LOGGER.log(Level.SEVERE, "Message received was not formatted correctly.");
+            try {
+                Frame responseFrame = new Frame(packet.getData());
+
+                if (responseFrame.type == Frame.FrameType.RESPONSE) {
+                    connected = true;
+                    System.out.println("connected!");
+                    otherConnected = (boolean) responseFrame.deserialize();
+                    return;
+                }
+
+                //else
+                //LOGGER.log(Level.SEVERE, "Something other than a response with given.");
+
+            } catch (ClassNotFoundException | EOFException e) {
+                // this is fine, most likely just some video data incoming or some trash
+            }
+
         }
     }
 

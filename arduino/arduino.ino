@@ -3,6 +3,9 @@
 #include <ArduinoJson.h>
 #include <FastLED.h>
 
+//Generic Configs
+#define TIMEOUT_TIME 2000
+
 //Motor Configs
 #define MOTOR_1_PWM 3
 #define MOTOR_1_D1 4
@@ -15,7 +18,6 @@
 #define LAUNCHER_PIN 9
 #define LAUNCHER_ARM_POS 140
 #define ARM_PIN 10
-#define SCOOP_PIN 11
  
 //Lights Configs
 #define LIGHT_DATA_PIN 12
@@ -38,6 +40,10 @@ CRGB colorScheme[] = {
   CHSV(0,0,255) //mega bright white
 };
 
+//For loss detection
+long lastSignal = 0;
+int lastStatus = 0;
+
 void setup() {
   //Initalize Serial
   Serial.begin(115200);
@@ -55,7 +61,10 @@ void setup() {
   //Initalize Lights
   FastLED.addLeds<WS2812B, LIGHT_DATA_PIN, GRB>(leds, NUM_LEDS);
   FastLED.clear();
+
+  lastSignal = millis();
 }
+
 
 void loop() {
   //wait for data
@@ -66,20 +75,24 @@ void loop() {
     JsonObject& obj = jsonBuffer.parse(comms);
     
     if (obj.success()) {
-      int status = obj["status"];
-      if (status == 0) {
+      lastStatus = obj["status"];
+      if (lastStatus == 0) {
         MotorInstruction(obj["motor1"], obj["motor2"]);
         LauncherInstruction(obj["launcher"]);
         ArmInstruction(obj["arm"]);
         LightsInstruction(obj["lights"]);
       }
-      if (status == 1) {
+      if (lastStatus == 1) {
         WereFucked();
         MotorInstruction(0,0);
       }
     }
     
     Serial.write(1);
+  } else {
+    if (lastStatus == 1 || millis() - lastSignal > TIMEOUT_TIME) {
+      WereFucked();
+    }
   }
 }
 
@@ -105,15 +118,12 @@ void LightsInstruction(JsonArray& data) {
   FastLED.show();
 }
 
-bool red = false;
 void WereFucked() {
-  if (red) {
-    red = false;
+  if (millis() % 300 > 150) {
     for (int i=0; i<NUM_LEDS; i++) {
       leds[i] = colorScheme[0];
     }
   } else {
-    red = true;
     for (int i=0; i<NUM_LEDS; i++) {
       leds[i] = colorScheme[1];
     }

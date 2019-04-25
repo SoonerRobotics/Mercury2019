@@ -47,7 +47,16 @@ public class RaspberryPiDriver {
         thread.start();
 
         while (running) {
-            Frame in = connection.receiveFrame();
+            Frame in = connection.receiveFrameNonBlocking();
+            if (in == null) {
+                //we have lost connection, ruh roh
+                Arduino.ArduinoEvent event = new Arduino.ArduinoEvent();
+                event.status = 1;
+
+                arduino.write(event);
+
+                Thread.sleep(200);
+            }
             if (in.type == Frame.FrameType.ROBOT) {
                 //LOGGER.log(Level.FINE, "Robot Instructions: " + Arrays.toString(in.bytes));
 
