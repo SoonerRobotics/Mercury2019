@@ -25,19 +25,25 @@ public class ClientConnection {
         long tick = 0;
         ClientConnection conn;
 
+        boolean running = false;
+
         KeepAliveScheduler(ClientConnection connection) {
             conn = connection;
         }
 
         @Override
         public void run() {
+            if (running) {
+                return;
+            }
+
+            running = true;
 
             //have we lost connection to the server?
             long curTime = new Date().getTime();
 
             //have we lost connection? If so, reset literally everything we're fucked
             if (curTime - lastReceivedPacket > TIMEOUT_PERIOID ){
-
                 connected = false;
 
                 while (!connected) {
@@ -69,8 +75,6 @@ public class ClientConnection {
                     }
                 }
 
-                connected = true;
-
                 synchronized (connectionBlock) {
                     connectionBlock.notify();
                 }
@@ -97,6 +101,8 @@ public class ClientConnection {
                     LOGGER.log(Level.SEVERE, "Could not send heartbeat packet!");
                 }
             }
+
+            running = false;
         }
     }
 
@@ -137,15 +143,16 @@ public class ClientConnection {
 
     public void sendFrame(Frame frame) throws IOException{
         if (!connected) {
-            throw new NotConnectedException();
+            blockUntilConnected();
         }
+
         DatagramPacket packet = frame.getPacket(address, port);
         socket.send(packet);
     }
 
     public Frame receiveFrame() throws IOException, ClassNotFoundException {
         if (!connected) {
-            throw new NotConnectedException();
+            blockUntilConnected();
         }
 
         //Wait until we get a non keep-alive packet
@@ -182,6 +189,8 @@ public class ClientConnection {
             LOGGER.log(Level.SEVERE, "Received no ack from the server.");
             return;
         }
+
+        lastReceivedPacket = new Date().getTime();
 
         try {
             Frame responseFrame = new Frame(packet.getData());
