@@ -30,6 +30,11 @@ public class RaspberryPiDriver {
         Arduino arduino = new Arduino();
         arduino.open();
 
+        Arduino.ArduinoEvent ohaio = new Arduino.ArduinoEvent();
+        ohaio.status = 2;
+
+        arduino.write(ohaio);
+
         ClientConnection connection = new ClientConnection("PI", Config.password, Config.ip, Config.port);
         connection.blockUntilConnected();
 

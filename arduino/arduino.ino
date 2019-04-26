@@ -1,5 +1,5 @@
 #include "Motor.h" //from RobotLib
-#include <Servo.h>
+#include <Adafruit_TiCoServo.h>
 #include <ArduinoJson.h>
 #include <FastLED.h>
 
@@ -28,8 +28,8 @@ Motor motorA;
 Motor motorB;
 
 //Servos
-Servo launcher;
-Servo arm;
+Adafruit_TiCoServo launcher;
+Adafruit_TiCoServo arm;
 
 //Lights
 CRGB leds[NUM_LEDS];
@@ -42,7 +42,8 @@ CRGB colorScheme[] = {
 
 //For loss detection
 long lastSignal = 0;
-int lastStatus = 0;
+int lastStatus = 3;
+bool hasSeenPi = false;
 
 void setup() {
   //Initalize Serial
@@ -76,6 +77,7 @@ void loop() {
     JsonObject& obj = jsonBuffer.parse(comms);
     
     if (obj.success()) {
+      hasSeenPi = true;
       lastStatus = obj["status"];
       if (lastStatus == 0) {
         MotorInstruction(obj["motor1"], obj["motor2"]);
@@ -87,12 +89,24 @@ void loop() {
         WereFucked();
         MotorInstruction(0,0);
       }
+      if (lastStatus == 2) {
+        AwaitServer();
+        MotorInstruction(0,0);
+      }
     }
-    
     Serial.write(1);
   } else {
-    if (lastStatus == 1 || millis() - lastSignal > TIMEOUT_TIME) {
+    if (lastStatus == 1 || (hasSeenPi && millis() - lastSignal > TIMEOUT_TIME)) {
       WereFucked();
+      MotorInstruction(0,0);
+    }
+    if (lastStatus == 2) {
+      AwaitServer();
+      MotorInstruction(0,0);
+    }
+    if (lastStatus == 3) {
+      AwaitPi();
+      MotorInstruction(0,0);
     }
   }
 }
@@ -119,8 +133,28 @@ void LightsInstruction(JsonArray& data) {
   FastLED.show();
 }
 
+void AwaitServer() {
+  for (int i=0; i<NUM_LEDS; i++) {
+    leds[i] = CHSV(0,0,0);
+  }
+
+  leds[millis() % 3200 / 100] = CHSV(0, 255, 100);
+
+  FastLED.show();
+}
+
+void AwaitPi() {
+  for (int i=0; i<NUM_LEDS; i++) {
+    leds[i] = CHSV(0,0,0);
+  }
+
+  leds[millis() % 3200 / 100] = CRGB( 0, 0, 150);
+
+  FastLED.show();
+}
+
 void WereFucked() {
-  if (millis() % 300 > 150) {
+  if (millis() % 1000 > 500) {
     for (int i=0; i<NUM_LEDS; i++) {
       leds[i] = colorScheme[0];
     }

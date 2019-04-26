@@ -30,6 +30,7 @@ public class ClientDriver {
 
     private static final boolean SWAP_STICKS = true;
 
+    private static boolean ballLock = false;
 
     public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException, XInputNotLoadedException {
 
@@ -96,10 +97,22 @@ public class ClientDriver {
 
             event.launcher = axes.rt > 0.8 ? 40 : 115;
 
-            if (device.getComponents().getButtons().left) {
-                event.arm = 50;
+            if (ballLock) {
+                if (device.getComponents().getButtons().left) {
+                    event.arm = 50;
+                } else {
+                    event.arm = 137;
+                }
+                if (device.getComponents().getButtons().down) {
+                    ballLock = false;
+                    event.arm = 145;
+                }
             } else {
-                event.arm = 140;
+                if (device.getComponents().getButtons().up) {
+                    ballLock = true;
+                    event.arm = 137;
+                }
+                event.arm = 145;
             }
 
             event.lights = new int[32];
