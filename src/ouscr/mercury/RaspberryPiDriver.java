@@ -30,6 +30,8 @@ public class RaspberryPiDriver {
         Arduino arduino = new Arduino();
         arduino.open();
 
+        Thread.sleep(500);
+
         Arduino.ArduinoEvent ohaio = new Arduino.ArduinoEvent();
         ohaio.status = 2;
 

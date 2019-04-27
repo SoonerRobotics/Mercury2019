@@ -77,9 +77,9 @@ void loop() {
     JsonObject& obj = jsonBuffer.parse(comms);
     
     if (obj.success()) {
-      hasSeenPi = true;
       lastStatus = obj["status"];
       if (lastStatus == 0) {
+        hasSeenPi = true;
         MotorInstruction(obj["motor1"], obj["motor2"]);
         LauncherInstruction(obj["launcher"]);
         ArmInstruction(obj["arm"]);
@@ -138,7 +138,7 @@ void AwaitServer() {
     leds[i] = CHSV(0,0,0);
   }
 
-  leds[millis() % 3200 / 100] = CHSV(0, 255, 100);
+  leds[millis() % 3200 / 100] = CRGB( 0, 150, 0);
 
   FastLED.show();
 }
