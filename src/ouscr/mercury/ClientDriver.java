@@ -21,11 +21,13 @@ public class ClientDriver {
     private static final float DEADZONE = 0.15f; //deadzone percentages
 
     private static final float MIN_SPEED_LEFT = 0f; //the speed we reach right after pushing past the deadzone
+    private static final float MAX_SPEED_LEFT_B = 0.35f; //max speed on a 0-1 scale.
     private static final float MAX_SPEED_LEFT = 0.7f; //max speed on a 0-1 scale.
     private static final boolean REVERSE_LEFT = false; //reverse the direction of the left motor
 
     private static final float MIN_SPEED_RIGHT = 0f; //the speed we reach right after pushing past the deadzone
-    private static final float MAX_SPEED_RIGHT = 0.7f; //max speed on a 0-1 scale.
+    private static final float MAX_SPEED_RIGHT_B = 0.25f; //max speed on a 0-1 scale.
+    private static final float MAX_SPEED_RIGHT = 0.55f; //max speed on a 0-1 scale.
     private static final boolean REVERSE_RIGHT = true; //reverse the direction of the right motor
 
     private static final boolean SWAP_STICKS = true;
@@ -33,6 +35,12 @@ public class ClientDriver {
     private static boolean ballLock = false;
     private static boolean lightsFLASHON = false;
     private static boolean yDebounce = false;
+
+    public static boolean bebsi = false;
+    private static boolean bDebounce = false;
+
+    public static boolean up = false;
+    private static boolean uDebounce = false;
 
     public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException, XInputNotLoadedException {
 
@@ -66,9 +74,13 @@ public class ClientDriver {
 
             int[] data = new int[2];
 
+            float max_left = bebsi ? MAX_SPEED_LEFT : MAX_SPEED_LEFT_B;
+            float max_right = bebsi ? MAX_SPEED_RIGHT : MAX_SPEED_RIGHT_B;
+
+
             //Left Motor
             data[0] = (int)(Math.abs(axes.ly) > DEADZONE ?
-                    (axes.ly) / (Math.abs(axes.ly)) * scale(Math.abs(axes.ly), DEADZONE, 1f, MIN_SPEED_LEFT, MAX_SPEED_LEFT) * 255
+                    (axes.ly) / (Math.abs(axes.ly)) * scale(Math.abs(axes.ly), DEADZONE, 1f, MIN_SPEED_LEFT, max_left) * 255
                     : 0
             );
 
@@ -78,7 +90,7 @@ public class ClientDriver {
 
             //Right Motor
             data[1] = (int)(Math.abs(axes.ry) > DEADZONE ?
-                    (axes.ry) / (Math.abs(axes.ry)) * scale(Math.abs(axes.ry), DEADZONE, 1f, MIN_SPEED_RIGHT, MAX_SPEED_RIGHT) * 255
+                    (axes.ry) / (Math.abs(axes.ry)) * scale(Math.abs(axes.ry), DEADZONE, 1f, MIN_SPEED_RIGHT, max_right) * 255
                     : 0
             );
 
@@ -99,32 +111,52 @@ public class ClientDriver {
 
             event.launcher = axes.rt > 0.8 ? 40 : 115;
 
-            if (ballLock) {
-                if (device.getComponents().getButtons().left) {
-                    event.arm = 50;
-                } else {
-                    event.arm = 137;
-                }
-                if (device.getComponents().getButtons().down) {
+            if (up) {
+                event.arm = 50;
+            } else  {
+                if (ballLock && device.getComponents().getButtons().down) {
                     ballLock = false;
+                }
+                if (!ballLock && device.getComponents().getButtons().lShoulder) {
+                    ballLock = true;
+                }
+                if (ballLock) {
+                    event.arm = 139;
+                } else {
                     event.arm = 145;
                 }
-            } else {
-                if (device.getComponents().getButtons().lShoulder) {
-                    ballLock = true;
-                    event.arm = 137;
-                }
-                event.arm = 145;
             }
 
             if (device.getComponents().getButtons().y) {
                 if (!yDebounce) {
                     yDebounce = true;
                     lightsFLASHON = !lightsFLASHON;
+                    System.out.println("lights is " + lightsFLASHON);
                 }
             } else {
                 yDebounce = false;
             }
+
+            if (device.getComponents().getButtons().b) {
+                if (!bDebounce) {
+                    bDebounce = true;
+                    bebsi = !bebsi;
+                    System.out.println("fast is " + bebsi);
+                }
+            } else {
+                bDebounce = false;
+            }
+
+            if (device.getComponents().getButtons().up) {
+                if (!uDebounce) {
+                    uDebounce = true;
+                    up = !up;
+                    System.out.println("up is " + up);
+                }
+            } else {
+                uDebounce = false;
+            }
+
 
             for (int i = 0; i < 32; i++) {
                 event.lights[i] = lightsFLASHON ? 2 : 0;
