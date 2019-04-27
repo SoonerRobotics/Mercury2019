@@ -31,6 +31,8 @@ public class ClientDriver {
     private static final boolean SWAP_STICKS = true;
 
     private static boolean ballLock = false;
+    private static boolean lightsFLASHON = false;
+    private static boolean yDebounce = false;
 
     public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException, XInputNotLoadedException {
 
@@ -108,16 +110,21 @@ public class ClientDriver {
                     event.arm = 145;
                 }
             } else {
-                if (device.getComponents().getButtons().up) {
+                if (device.getComponents().getButtons().lShoulder) {
                     ballLock = true;
                     event.arm = 137;
                 }
                 event.arm = 145;
             }
 
-            event.lights = new int[32];
-            for (int i=0; i<32; i++) {
-                event.lights[i] = (axes.lt*32) > i ? 2 : 0;
+            if (device.getComponents().getButtons().y && !yDebounce) {
+                yDebounce = true;
+                lightsFLASHON = !lightsFLASHON;
+                for (int i = 0; i < 32; i++) {
+                    event.lights[i] = lightsFLASHON ? 2 : 0;
+                }
+            } else {
+                yDebounce = false;
             }
 
             connection.sendFrame(new Frame(event, Frame.FrameType.ROBOT));
