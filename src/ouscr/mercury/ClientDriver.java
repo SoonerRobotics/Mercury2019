@@ -117,14 +117,17 @@ public class ClientDriver {
                 event.arm = 145;
             }
 
-            if (device.getComponents().getButtons().y && !yDebounce) {
-                yDebounce = true;
-                lightsFLASHON = !lightsFLASHON;
-                for (int i = 0; i < 32; i++) {
-                    event.lights[i] = lightsFLASHON ? 2 : 0;
+            if (device.getComponents().getButtons().y) {
+                if (!yDebounce) {
+                    yDebounce = true;
+                    lightsFLASHON = !lightsFLASHON;
                 }
             } else {
                 yDebounce = false;
+            }
+
+            for (int i = 0; i < 32; i++) {
+                event.lights[i] = lightsFLASHON ? 2 : 0;
             }
 
             connection.sendFrame(new Frame(event, Frame.FrameType.ROBOT));
