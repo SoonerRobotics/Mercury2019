@@ -49,6 +49,22 @@ public class ClientConnection {
                         }
                     }
 
+                    if (!isOtherConnected()) {
+                        while (true) {
+                            try {
+                                Frame response = receiveFrame();
+                                if (response.type == Frame.FrameType.RESPONSE) {
+                                    otherConnected = (boolean) response.deserialize();
+                                }
+                                break;
+                            } catch (SocketTimeoutException e) {
+                                //this is fine, just try again
+                            } catch (IOException | ClassNotFoundException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+
                     synchronized (connectionBlock) {
                         connectionBlock.notify();
                     }
@@ -112,6 +128,22 @@ public class ClientConnection {
                 connect();
             } catch (IOException e) {
                 e.printStackTrace();
+            }
+        }
+
+        if (!isOtherConnected()) {
+            while (true) {
+                try {
+                    Frame response = receiveFrame();
+                    if (response.type == Frame.FrameType.RESPONSE) {
+                        otherConnected = (boolean) response.deserialize();
+                    }
+                    break;
+                } catch (SocketTimeoutException e) {
+                    //this is fine, just try again
+                } catch (IOException | ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
             }
         }
 

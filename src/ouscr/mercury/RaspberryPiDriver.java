@@ -51,9 +51,11 @@ public class RaspberryPiDriver {
         thread.setConnection(connection);
         thread.start();
 
+        boolean hasReceivedPacket = false;
+
         while (running) {
             Frame in = connection.receiveFrameNonBlocking();
-            if (in == null) {
+            if (hasReceivedPacket && in == null) {
                 //we have lost connection, ruh roh
                 Arduino.ArduinoEvent event = new Arduino.ArduinoEvent();
                 event.status = 1;
@@ -61,8 +63,8 @@ public class RaspberryPiDriver {
                 arduino.write(event);
 
                 Thread.sleep(200);
-            }
-            if (in.type == Frame.FrameType.ROBOT) {
+            } else if (in.type == Frame.FrameType.ROBOT) {
+                hasReceivedPacket = true;
                 //LOGGER.log(Level.FINE, "Robot Instructions: " + Arrays.toString(in.bytes));
 
                 //Literally just write any ArduinoEvent to the Arduino
@@ -72,6 +74,13 @@ public class RaspberryPiDriver {
                 arduino.write(event);
 
                 System.out.println(event.getJson());
+            } else {
+                Arduino.ArduinoEvent event = new Arduino.ArduinoEvent();
+                event.status = 2;
+
+                arduino.write(event);
+
+                Thread.sleep(200);
             }
         }
 
