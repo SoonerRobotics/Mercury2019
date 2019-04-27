@@ -36,6 +36,10 @@ public class Arduino {
         public int arm;
         public int[] lights;
 
+        public ArduinoEvent() {
+            lights = new int[32];
+        }
+
         public String getJson() {
             return gson.toJson(this) + '\n';
         }
