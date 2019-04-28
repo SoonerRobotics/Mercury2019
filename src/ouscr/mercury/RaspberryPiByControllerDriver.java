@@ -12,11 +12,11 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class ClientDriver {
+public class RaspberryPiByControllerDriver {
 
-    private static final Logger LOGGER = Logger.getLogger( ClientDriver.class.getName() );
+    private static final Logger LOGGER = Logger.getLogger( RaspberryPiByControllerDriver.class.getName() );
 
-    private static final int TICKRATE = 12; //frequency (Hz) at which controller is polled
+    private static final int TICKRATE = 20; //frequency (Hz) at which controller is polled
 
     private static final float DEADZONE = 0.15f; //deadzone percentages
 
@@ -43,9 +43,6 @@ public class ClientDriver {
     private static boolean uDebounce = false;
 
     public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException, XInputNotLoadedException {
-
-        MercuryUI ui = new MercuryUI();
-
         // Retrieve all devices
         XInputDevice[] devices = XInputDevice.getAllDevices();
 
@@ -58,16 +55,8 @@ public class ClientDriver {
         // Retrieve the device for player 1
         XInputDevice device = XInputDevice.getDeviceFor(0); // or devices[0]
 
-        ClientConnection connection = new ClientConnection("PC", Config.password, Config.ip, Config.port);
-        System.out.println("waiting for connect");
-        connection.blockUntilConnected();
-
-        System.out.println("b4 start");
-
-
-        ui.start(connection);
-
-        System.out.println("after start");
+        Arduino arduino = new Arduino();
+        arduino.open();
 
         while (device.poll()) {
             XInputAxes axes = device.getComponents().getAxes();
@@ -162,7 +151,7 @@ public class ClientDriver {
                 event.lights[i] = lightsFLASHON ? 2 : 0;
             }
 
-            connection.sendFrame(new Frame(event, Frame.FrameType.ROBOT));
+            arduino.write(event);
 
             Thread.sleep(1000 / TICKRATE);
         }

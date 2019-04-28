@@ -2,6 +2,8 @@ package ouscr.mercury;
 
 import com.github.sarxos.webcam.Webcam;
 import com.github.sarxos.webcam.ds.v4l4j.V4l4jDriver;
+import com.github.strikerx3.jxinput.XInputDevice;
+import com.github.strikerx3.jxinput.exceptions.XInputNotLoadedException;
 import ouscr.mercury.networking.ClientConnection;
 import ouscr.mercury.networking.Frame;
 import ouscr.mercury.networking.VideoSendThread;
@@ -22,10 +24,17 @@ public class RaspberryPiDriver {
         Webcam.setDriver(new V4l4jDriver());
     }
 
-    public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
+    public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException, XInputNotLoadedException {
         LOGGER.setLevel(Level.ALL);
 
         boolean running = true;
+
+        XInputDevice[] devices = XInputDevice.getAllDevices();
+
+        if (!(devices.length == 0 || !devices[0].isConnected())) {
+            RaspberryPiByControllerDriver.main(args);
+            return;
+        }
 
         Arduino arduino = new Arduino();
         arduino.open();
